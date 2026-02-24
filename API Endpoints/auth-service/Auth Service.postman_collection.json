@@ -1,0 +1,71 @@
+{
+  "info": {
+    "_postman_id": "3b92a154-3b62-474d-af56-05346da7623e",
+    "name": "Auth Service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "33620906",
+    "_collection_link": "https://go.postman.co/collection/33620906-3b92a154-3b62-474d-af56-05346da7623e?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Register user",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"name\": \"Madara Meegama\",\r\n  \"email\": \"docter@gmail.com\",\r\n  \"password\": \"Doctor@2024\",\r\n  \"phone\": \"0771234567\",\r\n  \"address\": \"Galle\",\r\n  \"role\": \"DOCTOR\"\r\n}\r\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8081/api/auth/register",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8081",
+          "path": [
+            "api",
+            "auth",
+            "register"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"email\": \"docter@gmail.com\",\r\n  \"password\": \"Doctor@2024\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8081/api/auth/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8081",
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

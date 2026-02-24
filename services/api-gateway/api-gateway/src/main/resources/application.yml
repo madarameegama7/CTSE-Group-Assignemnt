@@ -1,0 +1,49 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+
+      routes:
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/auth/**
+
+      # Global CORS config for frontend development
+      server:
+        port: 8080
+
+      spring:
+        application:
+          name: api-gateway
+
+        cloud:
+          gateway:
+            discovery:
+              locator:
+                enabled: true
+                lower-case-service-id: true
+
+            routes:
+              - id: auth-service
+                uri: lb://auth-service
+                predicates:
+                  - Path=/api/auth/**
+
+                globalcors:
+                  add-to-simple-url-handler-mapping: true
+                  cors-configurations:
+                    '[/**]':
+                      allowedOriginPatterns: "*"
+                      allowedMethods: "*"
+                      allowedHeaders: "*"
+                      allowCredentials: false
