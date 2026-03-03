@@ -18,6 +18,11 @@ spring:
           predicates:
             - Path=/api/auth/**
 
+        - id: doctor-service
+          uri: lb://doctor-service
+          predicates:
+            - Path=/api/doctors/**
+
       # Global CORS config for frontend development
       server:
         port: 8080
@@ -38,6 +43,11 @@ spring:
                 uri: lb://auth-service
                 predicates:
                   - Path=/api/auth/**
+
+              - id: doctor-service
+                uri: lb://doctor-service
+                predicates:
+                  - Path=/api/doctors/**
 
                 globalcors:
                   add-to-simple-url-handler-mapping: true

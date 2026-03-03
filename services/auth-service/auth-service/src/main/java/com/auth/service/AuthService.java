@@ -49,7 +49,7 @@ public class AuthService {
 
 
         // Generate JWT
-        String token = jwtService.generateToken(user.getUserId());
+        String token = jwtService.generateToken(user.getUserId(), user.getRole().name());
         return new AuthResponse(token, user.getRole().name(), user.getUserId());
     }
 
@@ -63,7 +63,7 @@ public class AuthService {
             throw new RuntimeException("Invalid email or password");
         }
 
-        String token = jwtService.generateToken(user.getUserId());
+        String token = jwtService.generateToken(user.getUserId(), user.getRole().name());
         return new AuthResponse(token, user.getRole().name(), user.getUserId());
     }
 }
