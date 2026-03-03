@@ -26,9 +26,8 @@ public class JwtUtil {
         return Long.parseLong(claims.getSubject());
     }
 
-    public String extractRoleIfExists(String token) {
+    public String extractRole(String token) {
         Claims claims = parseClaims(token);
-        Object role = claims.get("role");
-        return role == null ? null : role.toString();
+        return claims.get("role", String.class);
     }
 }
