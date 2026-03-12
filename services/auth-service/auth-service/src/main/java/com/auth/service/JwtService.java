@@ -17,7 +17,7 @@ public class JwtService {
     @Value("${jwt.expiration}")
     private Long jwtExpiration;
 
-    public String generateToken(Long userId) {
+    public String generateToken(Long userId, String role) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpiration);
 
@@ -26,6 +26,7 @@ public class JwtService {
         return Jwts.builder()
                 .setSubject(String.valueOf(userId))
                 .claim("userId", userId)  // add userId claim
+                .claim("role", role)
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(key, SignatureAlgorithm.HS256)
