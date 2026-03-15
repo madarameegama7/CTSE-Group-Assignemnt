@@ -1,13 +1,15 @@
 package com.medical.doctorservice.dto;
 
-import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Data
-@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class SlotResponse {
     private Long slotId;
     private LocalDate date;

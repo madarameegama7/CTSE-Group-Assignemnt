@@ -20,36 +20,37 @@ public class DoctorService {
     private final AvailabilitySlotRepository slotRepository;
 
     public DoctorResponse addDoctor(CreateDoctorRequest req) {
-        Doctor doctor = Doctor.builder()
-                .name(req.getName())
-                .specialization(req.getSpecialization())
-                .hospital(req.getHospital())
-                .phone(req.getPhone())
-                .email(req.getEmail())
-                .build();
+        Doctor doctor = new Doctor();
+        doctor.setName(req.getName());
+        doctor.setSpecialization(req.getSpecialization());
+        doctor.setHospital(req.getHospital());
+        doctor.setPhone(req.getPhone());
+        doctor.setEmail(req.getEmail());
 
         Doctor saved = doctorRepository.save(doctor);
 
-        return DoctorResponse.builder()
-                .doctorId(saved.getDoctorId())
-                .name(saved.getName())
-                .specialization(saved.getSpecialization())
-                .hospital(saved.getHospital())
-                .phone(saved.getPhone())
-                .email(saved.getEmail())
-                .build();
+        DoctorResponse resp = new DoctorResponse();
+        resp.setDoctorId(saved.getDoctorId());
+        resp.setName(saved.getName());
+        resp.setSpecialization(saved.getSpecialization());
+        resp.setHospital(saved.getHospital());
+        resp.setPhone(saved.getPhone());
+        resp.setEmail(saved.getEmail());
+        return resp;
     }
 
     public List<DoctorResponse> getAllDoctors() {
         return doctorRepository.findAll().stream()
-                .map(d -> DoctorResponse.builder()
-                        .doctorId(d.getDoctorId())
-                        .name(d.getName())
-                        .specialization(d.getSpecialization())
-                        .hospital(d.getHospital())
-                        .phone(d.getPhone())
-                        .email(d.getEmail())
-                        .build())
+                .map(d -> {
+                    DoctorResponse r = new DoctorResponse();
+                    r.setDoctorId(d.getDoctorId());
+                    r.setName(d.getName());
+                    r.setSpecialization(d.getSpecialization());
+                    r.setHospital(d.getHospital());
+                    r.setPhone(d.getPhone());
+                    r.setEmail(d.getEmail());
+                    return r;
+                })
                 .toList();
     }
 
@@ -57,34 +58,35 @@ public class DoctorService {
         Doctor doctor = doctorRepository.findById(doctorId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor not found"));
 
-        AvailabilitySlot slot = AvailabilitySlot.builder()
-                .doctor(doctor)
-                .date(req.getDate())
-                .startTime(req.getStartTime())
-                .endTime(req.getEndTime())
-                .available(true)
-                .build();
+        AvailabilitySlot slot = new AvailabilitySlot();
+        slot.setDoctor(doctor);
+        slot.setDate(req.getDate());
+        slot.setStartTime(req.getStartTime());
+        slot.setEndTime(req.getEndTime());
+        slot.setAvailable(true);
 
         AvailabilitySlot saved = slotRepository.save(slot);
 
-        return SlotResponse.builder()
-                .slotId(saved.getSlotId())
-                .date(saved.getDate())
-                .startTime(saved.getStartTime())
-                .endTime(saved.getEndTime())
-                .available(saved.getAvailable())
-                .build();
+        SlotResponse sr = new SlotResponse();
+        sr.setSlotId(saved.getSlotId());
+        sr.setDate(saved.getDate());
+        sr.setStartTime(saved.getStartTime());
+        sr.setEndTime(saved.getEndTime());
+        sr.setAvailable(saved.getAvailable());
+        return sr;
     }
 
     public List<SlotResponse> getDoctorSlots(Long doctorId) {
         return slotRepository.findByDoctor_DoctorId(doctorId).stream()
-                .map(s -> SlotResponse.builder()
-                        .slotId(s.getSlotId())
-                        .date(s.getDate())
-                        .startTime(s.getStartTime())
-                        .endTime(s.getEndTime())
-                        .available(s.getAvailable())
-                        .build())
+                .map(s -> {
+                    SlotResponse r = new SlotResponse();
+                    r.setSlotId(s.getSlotId());
+                    r.setDate(s.getDate());
+                    r.setStartTime(s.getStartTime());
+                    r.setEndTime(s.getEndTime());
+                    r.setAvailable(s.getAvailable());
+                    return r;
+                })
                 .toList();
     }
 
