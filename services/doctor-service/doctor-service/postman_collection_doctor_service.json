@@ -1,0 +1,119 @@
+{
+  "info": {
+    "name": "Doctor Service API",
+    "_postman_id": "b1a6f9e2-0000-4000-8000-000000000000",
+    "description": "Collection to test Doctor Service endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "text"
+    },
+    {
+      "key": "doctorId",
+      "value": "",
+      "type": "text"
+    },
+    {
+      "key": "slotId",
+      "value": "",
+      "type": "text"
+    }
+  ],
+  "item": [
+    {
+      "name": "Add Doctor",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Dr. Alice\",\n  \"specialization\": \"Cardiology\",\n  \"hospital\": \"City Hospital\",\n  \"phone\": \"1234567890\",\n  \"email\": \"alice@example.com\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/doctors",
+          "host": ["{{base_url}}"],
+          "path": ["api","doctors"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get All Doctors",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/doctors",
+          "host": ["{{base_url}}"],
+          "path": ["api","doctors"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Add Slot (for doctor)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"date\": \"2026-03-20\",\n  \"startTime\": \"09:00:00\",\n  \"endTime\": \"09:30:00\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/doctors/{{doctorId}}/slots",
+          "host": ["{{base_url}}"],
+          "path": ["api","doctors","{{doctorId}}","slots"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Doctor Slots",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/doctors/{{doctorId}}/slots",
+          "host": ["{{base_url}}"],
+          "path": ["api","doctors","{{doctorId}}","slots"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Check Slot Availability",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/doctors/{{doctorId}}/slots/{{slotId}}",
+          "host": ["{{base_url}}"],
+          "path": ["api","doctors","{{doctorId}}","slots","{{slotId}}"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Reserve Slot",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/doctors/{{doctorId}}/slots/{{slotId}}/reserve",
+          "host": ["{{base_url}}"],
+          "path": ["api","doctors","{{doctorId}}","slots","{{slotId}}","reserve"]
+        }
+      },
+      "response": []
+    }
+  ]
+}
