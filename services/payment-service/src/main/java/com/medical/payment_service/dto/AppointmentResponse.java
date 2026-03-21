@@ -12,9 +12,9 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class AppointmentResponse {
-    private UUID appointmentId;
-    private UUID patientId;
-    private UUID doctorId;
+    private int appointmentId;
+    private int patientId;
+    private int doctorId;
     private LocalDate appointmentDate;
     private LocalTime appointmentTime;
     private String status;

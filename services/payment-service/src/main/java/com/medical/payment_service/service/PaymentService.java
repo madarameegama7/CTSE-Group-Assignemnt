@@ -4,7 +4,8 @@ import com.medical.payment_service.client.AppointmentClient;
 import com.medical.payment_service.dto.AppointmentResponse;
 import com.medical.payment_service.dto.CreatePaymentRequest;
 import com.medical.payment_service.dto.PaymentResponse;
-import com.medical.payment_service.dto.UpdateAppointmentPaymentRequest;
+import com.medical.payment_service.dto.UpdatePaymentRequest;
+import com.medical.payment_service.dto.UpdatePaymentStatusRequest;
 import com.medical.payment_service.entity.Payment;
 import com.medical.payment_service.entity.PaymentStatus;
 import com.medical.payment_service.exception.PaymentNotFoundException;
@@ -15,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -24,7 +24,8 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final AppointmentClient appointmentClient;
 
-    public PaymentResponse createPayment(CreatePaymentRequest request) {
+    // Create payment
+    public PaymentResponse createPayment(CreatePaymentRequest request, int patientId) {
         AppointmentResponse appointment;
 
         try {
@@ -39,42 +40,80 @@ public class PaymentService {
 
         Payment payment = Payment.builder()
                 .appointmentId(request.getAppointmentId())
-                .patientId(request.getPatientId())
+                .patientId(patientId)
                 .amount(request.getAmount())
                 .paymentMethod(request.getPaymentMethod())
-                .paymentStatus(PaymentStatus.SUCCESS)
+                .paymentStatus(PaymentStatus.PENDING)
                 .paymentDate(LocalDateTime.now())
                 .build();
 
         Payment savedPayment = paymentRepository.save(payment);
 
-        appointmentClient.updateAppointmentPaymentStatus(
-                request.getAppointmentId(),
-                new UpdateAppointmentPaymentRequest("PAID")
-        );
-
         return mapToResponse(savedPayment);
     }
 
-    public PaymentResponse getPaymentById(UUID paymentId) {
+    // Get payment details by payment ID
+    public PaymentResponse getPaymentById(int paymentId) {
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new PaymentNotFoundException("Payment not found with ID: " + paymentId));
 
         return mapToResponse(payment);
     }
 
-    public List<PaymentResponse> getPaymentsByPatientId(UUID patientId) {
+    // Get payment details by patient ID
+    public List<PaymentResponse> getPaymentsByPatientId(int patientId) {
         return paymentRepository.findByPatientId(patientId)
                 .stream()
                 .map(this::mapToResponse)
                 .toList();
     }
 
-    public List<PaymentResponse> getPaymentsByAppointmentId(UUID appointmentId) {
+    // Get payment details by appointment ID
+    public List<PaymentResponse> getPaymentsByAppointmentId(int appointmentId) {
         return paymentRepository.findByAppointmentId(appointmentId)
                 .stream()
                 .map(this::mapToResponse)
                 .toList();
+    }
+
+    // Update payment details - For patient
+    public PaymentResponse updatePayment(int paymentId, UpdatePaymentRequest request) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new PaymentNotFoundException("Payment not found with ID: " + paymentId));
+
+        // patient can update only while pending
+        if (payment.getPaymentStatus() != PaymentStatus.PENDING) {
+            throw new IllegalStateException("Payment details can only be updated while status is PENDING.");
+        }
+
+        if (request.getAmount() != null) {
+            payment.setAmount(request.getAmount());
+        }
+
+        if (request.getPaymentMethod() != null) {
+            payment.setPaymentMethod(request.getPaymentMethod());
+        }
+
+        Payment updatedPayment = paymentRepository.save(payment);
+
+        return mapToResponse(updatedPayment);
+    }
+
+    // Update payment status - For admin
+    public PaymentResponse updatePaymentStatus(int paymentId, UpdatePaymentStatusRequest request) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new PaymentNotFoundException("Payment not found with ID: " + paymentId));
+
+        if (payment.getPaymentStatus() == PaymentStatus.SUCCESS ||
+                payment.getPaymentStatus() == PaymentStatus.FAILED) {
+            throw new IllegalStateException("Payment already finalized. Cannot update status again.");
+        }
+
+        payment.setPaymentStatus(request.getPaymentStatus());
+
+        Payment updatedPayment = paymentRepository.save(payment);
+
+        return mapToResponse(updatedPayment);
     }
 
     private PaymentResponse mapToResponse(Payment payment) {

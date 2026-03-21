@@ -70,5 +70,16 @@ public class AppointmentController {
         Appointment appointment = appointmentService.updateStatus(id, request);
         return ResponseEntity.ok(appointment);
     }
+
+    /**
+     * Get appointment details by AppointmentId
+     * GET /appointments/{id}
+     * Added by Ashika
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<Appointment> getAppointmentById(@PathVariable Long id) {
+        Appointment appointment = appointmentService.getAppointmentById(id);
+        return ResponseEntity.ok(appointment);
+    }
 }
 
