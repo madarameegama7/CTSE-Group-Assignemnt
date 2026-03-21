@@ -5,7 +5,7 @@ import Sidebar from '../../components/Sidebar';
 import { useAuth } from '../../context/AuthContext';
 import {
   LayoutDashboard, CalendarDays, Search,
-  FileText, Settings, User
+  FileText, Settings, User, CreditCard
 } from 'lucide-react';
 
 const NAV = [
@@ -13,6 +13,7 @@ const NAV = [
   { to:'/patient/appointments', icon:CalendarDays,    label:'My Appointments' },
   { to:'/patient/find-doctors', icon:Search,          label:'Find Doctors'    },
   { to:'/patient/records',      icon:FileText,        label:'Medical Records' },
+  { to:'/patient/make-payments',icon:CreditCard,      label:'Make Payments'   },
   { type:'section', label:'Account' },
   { to:'/patient/profile',      icon:User,            label:'Profile'         },
   { to:'/patient/settings',     icon:Settings,        label:'Settings'        },
@@ -23,6 +24,7 @@ const PAGE_TITLES = {
   '/patient/appointments': { title:'My Appointments',   sub:'View and manage your bookings' },
   '/patient/find-doctors': { title:'Find Doctors',      sub:'Search and book specialists' },
   '/patient/records':      { title:'Medical Records',   sub:'Your health history' },
+  '/patient/make-payments':{ title:'Make Payments',     sub:'Pay for your upcoming appointments' },
   '/patient/profile':      { title:'Profile',           sub:'Manage your personal info' },
 };
 

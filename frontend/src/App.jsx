@@ -10,6 +10,7 @@ import PatientDashboard from "./pages/patient/PatientDashboard";
 import PatientAppointments from "./pages/patient/PatientAppointments";
 import FindDoctors from "./pages/patient/FindDoctors";
 import MedicalRecords from "./pages/patient/MedicalRecords";
+import MakePayments from "./pages/patient/MakePayments";
 
 // Doctor
 import DoctorLayout from "./pages/doctor/DoctorLayout";
@@ -63,6 +64,7 @@ function App() {
             <Route path="appointments" element={<PatientAppointments />} />
             <Route path="find-doctors" element={<FindDoctors />} />
             <Route path="records" element={<MedicalRecords />} />
+            <Route path="make-payments" element={<MakePayments />} />
           </Route>
 
           {/* ── Doctor Portal ── */}
