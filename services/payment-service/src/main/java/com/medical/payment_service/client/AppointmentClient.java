@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 @FeignClient(name = "appointment", url = "${appointment.url}")
 public interface AppointmentClient {
 
-    @GetMapping("/appointments/{appointmentId}")
+    @GetMapping("/api/appointments/{appointmentId}")
     AppointmentResponse getAppointmentById(@PathVariable("appointmentId") int appointmentId);
 
 }
