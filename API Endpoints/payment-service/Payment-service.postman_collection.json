@@ -1,0 +1,244 @@
+{
+  "info": {
+    "_postman_id": "82072702-a603-45ad-a09c-97a12bd92307",
+    "name": "Payment-service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "42516558"
+  },
+  "item": [
+    {
+      "name": "Create Payment",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwidXNlcklkIjoxLCJyb2xlIjoiUEFUSUVOVCIsImlhdCI6MTc3NDA5MTY5OCwiZXhwIjoxNzc0MDk1Mjk4fQ.im3kfQb16U-cTFUgriY_rm0uSe46tNqf0IRRcBVJgwc",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"appointmentId\": 2,\r\n  \"amount\": 3800.00,\r\n  \"paymentMethod\": \"CASH\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8083/api/payments",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8083",
+          "path": [
+            "api",
+            "payments"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update Payment Details (For Patient)",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwidXNlcklkIjoxLCJyb2xlIjoiUEFUSUVOVCIsImlhdCI6MTc3NDA5MTY5OCwiZXhwIjoxNzc0MDk1Mjk4fQ.im3kfQb16U-cTFUgriY_rm0uSe46tNqf0IRRcBVJgwc",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"appointmentId\": \"1\",\r\n  \"amount\": 2800.00,\r\n  \"paymentMethod\": \"CASH\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8083/api/payments/4",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8083",
+          "path": [
+            "api",
+            "payments",
+            "4"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update Payment Status (For Admin)",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyIiwidXNlcklkIjoyLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NzQwOTE4MzUsImV4cCI6MTc3NDA5NTQzNX0.-LbbfhMfkf1dNlEA2viudmdPSXyzREW72qV4IfWyiM8",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"paymentStatus\": \"SUCCESS\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8083/api/payments/4/status",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8083",
+          "path": [
+            "api",
+            "payments",
+            "4",
+            "status"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Payment Details By Payment ID",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwidXNlcklkIjoxLCJyb2xlIjoiUEFUSUVOVCIsImlhdCI6MTc3NDA4OTIwOCwiZXhwIjoxNzc0MDkyODA4fQ.8X5l8GeHZLadBr3wYWIpGogllfVZL-jDudfKLVzKoj4",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": ""
+        },
+        "url": {
+          "raw": "http://localhost:8083/api/payments/4",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8083",
+          "path": [
+            "api",
+            "payments",
+            "4"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Payment Details by Patient ID",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyIiwidXNlcklkIjoyLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NzQwODg3OTgsImV4cCI6MTc3NDA5MjM5OH0.Svac8qXgvZOOZlz97ke250_FOUHUxZRV6s5Uf7Xd-EE",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8083/api/payments/patient/1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8083",
+          "path": [
+            "api",
+            "payments",
+            "patient",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Payment Details by Appointment ID",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwidXNlcklkIjoxLCJyb2xlIjoiUEFUSUVOVCIsImlhdCI6MTc3NDA5MjI3MCwiZXhwIjoxNzc0MDk1ODcwfQ.4YTyKJ8WCf8wuI4o7iRp0Ho_Yx9ZRhuzy-BMR21B0NA",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8083/api/payments/appointment/2",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8083",
+          "path": [
+            "api",
+            "payments",
+            "appointment",
+            "2"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
