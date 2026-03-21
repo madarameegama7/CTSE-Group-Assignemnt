@@ -1,6 +1,6 @@
 package com.medical.payment_service.service;
 
-import com.medical.payment_service.client.AppointmentClient;
+import com.medical.payment_service.client.AppointmentServiceClient;
 import com.medical.payment_service.dto.AppointmentResponse;
 import com.medical.payment_service.dto.CreatePaymentRequest;
 import com.medical.payment_service.dto.PaymentResponse;
@@ -22,7 +22,7 @@ import java.util.List;
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
-    private final AppointmentClient appointmentClient;
+    private final AppointmentServiceClient appointmentClient;
 
     // Create payment
     public PaymentResponse createPayment(CreatePaymentRequest request, int patientId) {
