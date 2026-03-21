@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { APPOINTMENTS, USERS_LIST } from "../../utils/mockData";
 import { Check, X, Eye, DollarSign, CreditCard } from "lucide-react";
 
@@ -108,7 +108,7 @@ export default function VerifyPayments() {
   return (
     <div>
       {/* Summary tiles */}
-      <div className="stats-grid" style={{ marginBottom: 16 }}>
+      <div className="stats-grid" style={{ marginBottom: 24 }}>
         {(() => {
           const total = payments.length;
           const pending = payments.filter((p) => p.status === "PENDING").length;
@@ -165,150 +165,129 @@ export default function VerifyPayments() {
           });
         })()}
       </div>
-      <div className="card">
-        <div className="card-header">
-          <span className="card-title">Verify Payments</span>
+      <div className="card fade-up">
+        <div style={{ display: 'flex', gap: 12, padding: '16px 20px', borderBottom: '1px solid #F1F5F9', flexWrap: 'wrap', alignItems: 'center' }}>
+          <div style={{ flex: 1, fontWeight: 600, color: '#0F172A', fontSize: '1.1rem' }}>Payment Verification Requests</div>
+          <span style={{ fontSize: '0.84rem', color: '#64748B' }}>
+            Review incoming payments for appointments.
+          </span>
         </div>
 
-        <div className="card-body">
-          <p style={{ marginTop: 0, color: "#64748B" }}>
-            Review and verify incoming payments for appointments. Click{" "}
-            <strong>Verify</strong> to mark as verified or{" "}
-            <strong>Reject</strong> to mark as failed.
-          </p>
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Transaction ID</th>
+                <th>Patient</th>
+                <th>Appointment Details</th>
+                <th>Date & Time</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th style={{ textAlign: 'right' }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {payments.map((p) => {
+                const appt = findAppointment(p.appointmentId) || {};
+                const patientEmail =
+                  USERS_LIST.find((u) => u.name === p.patientName)?.email || "—";
 
-          <div style={{ marginTop: 12, display: "grid", gap: 12 }}>
-            {payments.map((p) => {
-              const appt = findAppointment(p.appointmentId) || {};
-              const patientEmail =
-                USERS_LIST.find((u) => u.name === p.patientName)?.email || "—";
-
-              return (
-                <div
-                  key={p.id}
-                  className="card"
-                  style={{ padding: 12, borderRadius: 8 }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                      gap: 12,
-                    }}
-                  >
-                    <div style={{ flex: 1 }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          gap: 12,
-                        }}
-                      >
-                        <div>
-                          <div style={{ fontWeight: 700, fontSize: "1rem" }}>
-                            {p.patientName}
-                          </div>
-                          <div style={{ color: "#64748B", fontSize: "0.9rem" }}>
-                            {appt.type || "Appointment"}
-                            {appt.doctorName || p.doctorName
-                              ? ` • ${appt.doctorName || p.doctorName}`
-                              : ""}
-                          </div>
-                          <div
-                            style={{
-                              color: "#94A3B8",
-                              fontSize: "0.82rem",
-                              marginTop: 6,
-                            }}
+                return (
+                  <React.Fragment key={p.id}>
+                    <tr>
+                      <td style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#94A3B8' }}>{p.txId}</td>
+                      <td style={{ fontWeight: 600, color: '#0F172A' }}>{p.patientName}</td>
+                      <td style={{ color: '#64748B' }}>
+                        {appt.type || "Appointment"}
+                        {appt.doctorName || p.doctorName
+                          ? ` • ${appt.doctorName || p.doctorName}`
+                          : ""}
+                      </td>
+                      <td style={{ color: '#64748B' }}>
+                        {p.date} • {p.time}
+                      </td>
+                      <td style={{ fontWeight: 700, color: '#0F172A' }}>${p.amount}</td>
+                      <td>{badgeClass(p.status)}</td>
+                      <td style={{ textAlign: 'right' }}>
+                        <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+                          <button
+                            className="btn btn-success btn-sm"
+                            onClick={() => openConfirm(p.id, "verify")}
+                            disabled={p.status === "VERIFIED"}
+                            title="Verify"
+                            style={{ padding: '6px' }}
                           >
-                            {p.date} • {p.time}
-                          </div>
+                            <Check size={14} />
+                          </button>
+                          <button
+                            className="btn btn-danger btn-sm"
+                            onClick={() => openConfirm(p.id, "reject")}
+                            disabled={p.status === "FAILED"}
+                            title="Reject"
+                            style={{ padding: '6px' }}
+                          >
+                            <X size={14} />
+                          </button>
+                          <button
+                            className="btn btn-ghost btn-sm"
+                            onClick={() =>
+                              setExpanded((current) =>
+                                current === p.id ? null : p.id
+                              )
+                            }
+                            title="Details"
+                            style={{ padding: '6px' }}
+                          >
+                            <Eye size={14} />
+                          </button>
                         </div>
-
-                        <div style={{ textAlign: "right" }}>
-                          <div style={{ fontWeight: 800, fontSize: "1rem" }}>
-                            ${p.amount}
+                      </td>
+                    </tr>
+                    {expanded === p.id && (
+                      <tr className="fade-up">
+                        <td colSpan={7} style={{ background: '#F8FAFC', padding: '16px 24px', borderBottom: '1px solid #E2E8F0' }}>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 16, fontSize: '0.875rem', textAlign: 'left' }}>
+                            <div>
+                              <div style={{ marginBottom: 8, display: 'flex' }}>
+                                <strong style={{ width: 140, color: '#475569' }}>Patient Email:</strong>
+                                <span style={{ color: '#0F172A' }}>{patientEmail}</span>
+                              </div>
+                              <div style={{ marginBottom: 8, display: 'flex' }}>
+                                <strong style={{ width: 140, color: '#475569' }}>Transaction ID:</strong>
+                                <span style={{ fontFamily: 'monospace', color: '#0F172A' }}>{p.txId}</span>
+                              </div>
+                              <div style={{ display: 'flex' }}>
+                                <strong style={{ width: 140, color: '#475569' }}>Payment Method:</strong>
+                                <span style={{ color: '#0F172A' }}>{p.method}</span>
+                              </div>
+                            </div>
+                            <div>
+                              <div style={{ marginBottom: 8, display: 'flex' }}>
+                                <strong style={{ width: 140, color: '#475569' }}>Paid At:</strong>
+                                <span style={{ color: '#0F172A' }}>{p.paidAt}</span>
+                              </div>
+                              <div style={{ marginBottom: 8, display: 'flex' }}>
+                                <strong style={{ width: 140, color: '#475569' }}>Invoice Number:</strong>
+                                <span style={{ color: '#0F172A' }}>{p.invoice}</span>
+                              </div>
+                              <div style={{ display: 'flex' }}>
+                                <strong style={{ width: 140, color: '#475569' }}>Status:</strong>
+                                <span style={{ color: '#0F172A' }}>{p.status}</span>
+                              </div>
+                            </div>
                           </div>
-                          <div style={{ marginTop: 6 }}>
-                            {badgeClass(p.status)}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 8,
-                        marginLeft: 12,
-                      }}
-                    >
-                      <button
-                        className="btn btn-success"
-                        onClick={() => openConfirm(p.id, "verify")}
-                      >
-                        <Check size={14} /> Verify
-                      </button>
-
-                      <button
-                        className="btn btn-danger"
-                        onClick={() => openConfirm(p.id, "reject")}
-                      >
-                        <X size={14} /> Reject
-                      </button>
-
-                      <button
-                        className="btn btn-ghost"
-                        onClick={() =>
-                          setExpanded((current) =>
-                            current === p.id ? null : p.id,
-                          )
-                        }
-                      >
-                        <Eye size={14} /> Details
-                      </button>
-                    </div>
-                  </div>
-
-                  {expanded === p.id && (
-                    <div
-                      style={{
-                        marginTop: 12,
-                        background: "#F8FAFC",
-                        padding: 10,
-                        borderRadius: 6,
-                      }}
-                    >
-                      <div>
-                        <strong>Patient:</strong> {p.patientName} (
-                        {patientEmail})
-                      </div>
-                      <div>
-                        <strong>Appointment:</strong> {appt.type || "—"} with{" "}
-                        {appt.doctorName || p.doctorName} on {p.date} at{" "}
-                        {p.time}
-                      </div>
-                      <div>
-                        <strong>Transaction ID:</strong> {p.txId}
-                      </div>
-                      <div>
-                        <strong>Method:</strong> {p.method}
-                      </div>
-                      <div>
-                        <strong>Paid At:</strong> {p.paidAt}
-                      </div>
-                      <div>
-                        <strong>Invoice:</strong> {p.invoice}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+        
+        <div style={{ padding: '12px 20px', borderTop: '1px solid #F1F5F9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: '0.78rem', color: '#94A3B8' }}>Showing {payments.length} transactions</span>
         </div>
       </div>
 
