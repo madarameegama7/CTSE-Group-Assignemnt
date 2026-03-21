@@ -20,7 +20,7 @@ server:
 
 # Feign client target for appointment service
 appointment:
-  url: http://localhost:8082
+  url: http://localhost:8084
 
 jwt:
   secret: 08788b9566dad0f379f4530d090c9163cc199fdf76eef8443bee827d05bee706fff39966
