@@ -4,7 +4,6 @@ import com.medical.payment_service.client.AppointmentClient;
 import com.medical.payment_service.dto.AppointmentResponse;
 import com.medical.payment_service.dto.CreatePaymentRequest;
 import com.medical.payment_service.dto.PaymentResponse;
-import com.medical.payment_service.dto.UpdateAppointmentPaymentRequest;
 import com.medical.payment_service.dto.UpdatePaymentRequest;
 import com.medical.payment_service.dto.UpdatePaymentStatusRequest;
 import com.medical.payment_service.entity.Payment;
@@ -26,7 +25,7 @@ public class PaymentService {
     private final AppointmentClient appointmentClient;
 
     // Create payment
-    public PaymentResponse createPayment(CreatePaymentRequest request) {
+    public PaymentResponse createPayment(CreatePaymentRequest request, int patientId) {
         AppointmentResponse appointment;
 
         try {
@@ -41,7 +40,7 @@ public class PaymentService {
 
         Payment payment = Payment.builder()
                 .appointmentId(request.getAppointmentId())
-                .patientId(request.getPatientId())
+                .patientId(patientId)
                 .amount(request.getAmount())
                 .paymentMethod(request.getPaymentMethod())
                 .paymentStatus(PaymentStatus.PENDING)
@@ -53,7 +52,7 @@ public class PaymentService {
         return mapToResponse(savedPayment);
     }
 
-    // Get payment by payment ID
+    // Get payment details by payment ID
     public PaymentResponse getPaymentById(int paymentId) {
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new PaymentNotFoundException("Payment not found with ID: " + paymentId));
@@ -61,7 +60,7 @@ public class PaymentService {
         return mapToResponse(payment);
     }
 
-    // Get payments by patient ID
+    // Get payment details by patient ID
     public List<PaymentResponse> getPaymentsByPatientId(int patientId) {
         return paymentRepository.findByPatientId(patientId)
                 .stream()
@@ -69,7 +68,7 @@ public class PaymentService {
                 .toList();
     }
 
-    // Get payments by appointment ID
+    // Get payment details by appointment ID
     public List<PaymentResponse> getPaymentsByAppointmentId(int appointmentId) {
         return paymentRepository.findByAppointmentId(appointmentId)
                 .stream()
@@ -77,7 +76,7 @@ public class PaymentService {
                 .toList();
     }
 
-    // Update payment details
+    // Update payment details - For patient
     public PaymentResponse updatePayment(int paymentId, UpdatePaymentRequest request) {
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new PaymentNotFoundException("Payment not found with ID: " + paymentId));
@@ -100,7 +99,7 @@ public class PaymentService {
         return mapToResponse(updatedPayment);
     }
 
-    // Update payment status
+    // Update payment status - For admin
     public PaymentResponse updatePaymentStatus(int paymentId, UpdatePaymentStatusRequest request) {
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new PaymentNotFoundException("Payment not found with ID: " + paymentId));
@@ -113,18 +112,6 @@ public class PaymentService {
         payment.setPaymentStatus(request.getPaymentStatus());
 
         Payment updatedPayment = paymentRepository.save(payment);
-
-        if (request.getPaymentStatus() == PaymentStatus.SUCCESS) {
-            appointmentClient.updateAppointmentPaymentStatus(
-                    payment.getAppointmentId(),
-                    new UpdateAppointmentPaymentRequest("PAID")
-            );
-        } else if (request.getPaymentStatus() == PaymentStatus.FAILED) {
-            appointmentClient.updateAppointmentPaymentStatus(
-                    payment.getAppointmentId(),
-                    new UpdateAppointmentPaymentRequest("FAILED")
-            );
-        }
 
         return mapToResponse(updatedPayment);
     }

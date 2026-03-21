@@ -8,6 +8,7 @@ import com.medical.payment_service.service.PaymentService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,8 +24,16 @@ public class PaymentController {
 
     @Operation(summary = "Create a payment with initial status PENDING")
     @PostMapping
-    public ResponseEntity<PaymentResponse> createPayment(@Valid @RequestBody CreatePaymentRequest request) {
-        return new ResponseEntity<>(paymentService.createPayment(request), HttpStatus.CREATED);
+    public ResponseEntity<PaymentResponse> createPayment(
+            @Valid @RequestBody CreatePaymentRequest request,
+            Authentication authentication) {
+
+        int patientId = Integer.parseInt(authentication.getName());
+
+        return new ResponseEntity<>(
+                paymentService.createPayment(request, patientId),
+                HttpStatus.CREATED
+        );
     }
 
     @Operation(summary = "Get payment by ID")
