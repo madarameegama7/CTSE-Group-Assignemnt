@@ -12,10 +12,6 @@ import reactor.core.publisher.Mono;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * Doctor Service Client
- * Communicates with Doctor Service via API Gateway
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -26,9 +22,6 @@ public class DoctorServiceClient {
     @Value("${doctor.service.url:http://localhost:8080/api/doctors}")
     private String doctorServiceUrl;
 
-    /**
-     * Get doctor availability slot
-     */
     public Mono<SlotDTO> getSlot(Long doctorId, Long slotId) {
         return webClient.get()
                 .uri("/doctors/{doctorId}/slots/{slotId}", doctorId, slotId)
@@ -44,9 +37,6 @@ public class DoctorServiceClient {
                 .onErrorResume(error -> Mono.empty());
     }
 
-    /**
-     * Get all available slots for a doctor
-     */
     public Mono<List<SlotDTO>> getAllSlots(Long doctorId) {
         return webClient.get()
                 .uri("/doctors/{doctorId}/slots", doctorId)
@@ -57,9 +47,6 @@ public class DoctorServiceClient {
                 .onErrorReturn(Arrays.asList());
     }
 
-    /**
-     * Verify slot availability with Doctor Service
-     */
     public Mono<Boolean> verifySlotAvailability(Long doctorId, Long slotId) {
         return getSlot(doctorId, slotId)
                 .map(slot -> slot.getAvailable() != null && slot.getAvailable())

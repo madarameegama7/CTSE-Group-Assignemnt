@@ -7,39 +7,39 @@ spring:
 
   cloud:
     gateway:
-      discovery:
-        locator:
-          enabled: false
-          lower-case-service-id: true
+      server:
+        webflux:
+          discovery:
+            locator:
+              enabled: false
+              lower-case-service-id: true
 
-      routes:
-        - id: auth-service
-          uri: http://localhost:8081
-          predicates:
-            - Path=/api/auth/**
+          routes:
+            - id: auth-service
+              uri: http://localhost:8081
+              predicates:
+                - Path=/api/auth/**
 
-        - id: doctor-service
-          uri: http://localhost:8084
-          predicates:
-            - Path=/api/doctors/**
+            - id: doctor-service
+              uri: http://localhost:8084
+              predicates:
+                - Path=/api/doctors/**
 
-        - id: appointment-service
-          uri: http://localhost:8082
-          predicates:
-            - Path=/api/appointments/**
+            - id: appointment-service
+              uri: http://localhost:8082
+              predicates:
+                - Path=/api/appointments/**
 
-        - id: payment-service
-          uri: http://localhost:8083
-          predicates:
-            - Path=/api/payments/**
+            - id: payment-service
+              uri: http://localhost:8083
+              predicates:
+                - Path=/api/payments/**
 
-      globalcors:
-        add-to-simple-url-handler-mapping: true
-        cors-configurations:
-          '[/**]':
-            allowedOriginPatterns: "*"
-            allowedMethods: "*"
-            allowedHeaders: "*"
-            allowCredentials: false
-            allowCredentials: false
-
+          globalcors:
+            add-to-simple-url-handler-mapping: true
+            cors-configurations:
+              '[/**]':
+                allowedOriginPatterns: "*"
+                allowedMethods: "*"
+                allowedHeaders: "*"
+                allowCredentials: false

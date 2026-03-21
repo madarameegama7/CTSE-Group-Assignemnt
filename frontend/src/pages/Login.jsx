@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/Authcontext';
 import { Activity, Eye, EyeOff, Heart, Stethoscope, Shield } from 'lucide-react';
 
 const DEMO_ACCOUNTS = [
@@ -31,7 +31,6 @@ export default function Login() {
 
   return (
     <div style={styles.root}>
-      {/* Left panel */}
       <div style={styles.left}>
         <div style={styles.leftInner}>
           <div style={styles.brand}>
@@ -57,7 +56,6 @@ export default function Login() {
         </div>
       </div>
 
-      {/* Right panel */}
       <div style={styles.right}>
         <div style={styles.formCard}>
           <div style={styles.formHeader}>
@@ -65,7 +63,6 @@ export default function Login() {
             <p style={styles.formSub}>Choose your account type below</p>
           </div>
 
-          {/* Quick‑select tiles */}
           <div style={styles.tileRow}>
             {DEMO_ACCOUNTS.map(acc => {
               const Icon = acc.icon;
@@ -138,6 +135,10 @@ export default function Login() {
 
             <p style={styles.demoHint}>
               <strong>Demo credentials:</strong> {selected ? selected.email : 'select a role above'} / demo123
+            </p>
+            
+            <p style={styles.demoHint}>
+              Don't have an account? <Link to="/register" style={{ color: '#2563EB', fontWeight: 600, textDecoration: 'none' }}>Sign up</Link>
             </p>
           </form>
         </div>

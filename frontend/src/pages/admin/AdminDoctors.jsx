@@ -1,13 +1,16 @@
-import { useState } from 'react';
-import { DOCTORS } from '../../utils/mockData';
-import { Search, Plus, Star, MoreHorizontal, CheckCircle2, XCircle, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import useDoctors from '../../hooks/useDoctors';
+import useDoctorSlots from '../../hooks/useDoctorSlots';
+import { api } from '../../services/api';
+import { Search, Plus, Star, MoreHorizontal, CheckCircle2, XCircle, X, Clock, Trash2 } from 'lucide-react';
 
 const SPECIALTIES = ['Cardiologist','Neurologist','Orthopedic','Dermatologist','Pediatrician','Psychiatrist'];
 const DEPARTMENTS  = ['Cardiology','Neurology','Orthopedics','Dermatology','Pediatrics','Psychiatry'];
 const EMPTY_FORM   = { name:'', email:'', specialty:'Cardiologist', department:'Cardiology', experience:'', fee:'', available:true };
 
 export default function AdminDoctors() {
-  const [doctors, setDoctors]   = useState(DOCTORS);
+  const { doctors: doctorsData } = useDoctors();
+  const [doctors, setDoctors]   = useState([]);
   const [search, setSearch]     = useState('');
   const [filter, setFilter]     = useState('All');
   const [showModal, setShowModal] = useState(false);
@@ -15,6 +18,16 @@ export default function AdminDoctors() {
   const [errors, setErrors]     = useState({});
   const [saving, setSaving]     = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
+  
+  const [selectedDocId, setSelectedDocId] = useState(null);
+  const [showSlotsModal, setShowSlotsModal] = useState(false);
+  const { slots, loading: slotsLoading, createSlot, deleteSlot } = useDoctorSlots(selectedDocId);
+  const [slotForm, setSlotForm] = useState({ date: '', startTime: '', endTime: '' });
+  const [slotErrors, setSlotErrors] = useState({});
+
+  useEffect(() => {
+    setDoctors(doctorsData);
+  }, [doctorsData]);
 
   const DEPTS = ['All', ...new Set(doctors.map(d => d.department))];
 
@@ -41,13 +54,13 @@ export default function AdminDoctors() {
     const e2 = validate();
     if (Object.keys(e2).length) { setErrors(e2); return; }
     setSaving(true);
-    await new Promise(r => setTimeout(r, 800));
-    const initials = form.name.split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase();
-    const newDoc = {
-      id:         'd' + Date.now(),
-      name:       form.name.trim(),
-      email:      form.email.trim(),
-      specialty:  form.specialty,
+    try {
+      const initials = form.name.split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+      const newDoc = {
+        id:         'd' + Date.now(),
+        name:       form.name.trim(),
+        email:      form.email.trim(),
+        specialty:  form.specialty,
       department: form.department,
       experience: form.experience.trim(),
       fee:        Number(form.fee),
@@ -64,18 +77,74 @@ export default function AdminDoctors() {
     setErrors({});
     setSuccessMsg(`Dr. ${newDoc.name} added successfully!`);
     setTimeout(() => setSuccessMsg(''), 3000);
+    } catch (error) {
+      console.error('Error adding doctor:', error);
+      setErrors({ submit: 'Failed to add doctor' });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const closeModal = () => { setShowModal(false); setForm(EMPTY_FORM); setErrors({}); };
 
+  const openSlotsModal = (docId) => {
+    setSelectedDocId(docId);
+    setShowSlotsModal(true);
+    setSlotForm({ date: '', startTime: '', endTime: '' });
+    setSlotErrors({});
+  };
+
+  const closeSlotsModal = () => {
+    setShowSlotsModal(false);
+    setSelectedDocId(null);
+    setSlotForm({ date: '', startTime: '', endTime: '' });
+    setSlotErrors({});
+  };
+
+  const validateSlot = () => {
+    const e = {};
+    if (!slotForm.date) e.date = 'Date is required';
+    if (!slotForm.startTime) e.startTime = 'Start time is required';
+    if (!slotForm.endTime) e.endTime = 'End time is required';
+    if (slotForm.startTime && slotForm.endTime && slotForm.startTime >= slotForm.endTime) {
+      e.endTime = 'End time must be after start time';
+    }
+    return e;
+  };
+
+  const handleAddSlot = async (e) => {
+    e.preventDefault();
+    const e2 = validateSlot();
+    if (Object.keys(e2).length) { setSlotErrors(e2); return; }
+    
+    try {
+      await createSlot(slotForm.date, slotForm.startTime, slotForm.endTime);
+      setSlotForm({ date: '', startTime: '', endTime: '' });
+      setSlotErrors({});
+      setSuccessMsg('Slot added successfully!');
+      setTimeout(() => setSuccessMsg(''), 3000);
+    } catch (err) {
+      setSlotErrors({ submit: err.message || 'Failed to add slot' });
+    }
+  };
+
+  const handleDeleteSlot = async (slotId) => {
+    if (!window.confirm('Delete this slot?')) return;
+    try {
+      await deleteSlot(slotId);
+      setSuccessMsg('Slot deleted successfully!');
+      setTimeout(() => setSuccessMsg(''), 3000);
+    } catch (err) {
+      console.error('Failed to delete slot:', err);
+    }
+  };
+
   return (
     <div>
-      {/* Toast */}
       {successMsg && (
         <div style={toast}>✓ {successMsg}</div>
       )}
 
-      {/* Stats */}
       <div className="stats-grid" style={{ marginBottom: 24 }}>
         {[
           { label: 'Total Doctors',   value: doctors.length },
@@ -91,7 +160,6 @@ export default function AdminDoctors() {
       </div>
 
       <div className="card fade-up">
-        {/* Toolbar */}
         <div style={{ display: 'flex', gap: 12, padding: '16px 20px', borderBottom: '1px solid #F1F5F9', flexWrap: 'wrap', alignItems: 'center' }}>
           <div className="search-wrap" style={{ flex: 1, minWidth: 200 }}>
             <Search size={15} />
@@ -105,7 +173,6 @@ export default function AdminDoctors() {
           </button>
         </div>
 
-        {/* Table */}
         <div className="table-wrap">
           <table>
             <thead>
@@ -147,8 +214,8 @@ export default function AdminDoctors() {
                     }
                   </td>
                   <td>
-                    <button className="btn btn-ghost btn-sm" style={{ padding: '4px 8px' }}>
-                      <MoreHorizontal size={15} />
+                    <button className="btn btn-ghost btn-sm" style={{ padding: '4px 8px' }} onClick={() => openSlotsModal(doc.id)}>
+                      <Clock size={15} />
                     </button>
                   </td>
                 </tr>
@@ -161,7 +228,6 @@ export default function AdminDoctors() {
         </div>
       </div>
 
-      {/* Add Doctor Modal */}
       {showModal && (
         <div className="modal-overlay" onClick={e => { if (e.target === e.currentTarget) closeModal(); }}>
           <div className="modal" style={{ maxWidth: 560 }}>
@@ -172,7 +238,6 @@ export default function AdminDoctors() {
             <form onSubmit={handleSubmit}>
               <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
 
-                {/* Name + Email */}
                 <div className="grid-2" style={{ gap: 12 }}>
                   <div className="form-group" style={{ marginBottom: 0 }}>
                     <label className="form-label">Full Name *</label>
@@ -197,7 +262,6 @@ export default function AdminDoctors() {
                   </div>
                 </div>
 
-                {/* Specialty + Department */}
                 <div className="grid-2" style={{ gap: 12 }}>
                   <div className="form-group" style={{ marginBottom: 0 }}>
                     <label className="form-label">Specialty *</label>
@@ -221,7 +285,6 @@ export default function AdminDoctors() {
                   </div>
                 </div>
 
-                {/* Experience + Fee */}
                 <div className="grid-2" style={{ gap: 12 }}>
                   <div className="form-group" style={{ marginBottom: 0 }}>
                     <label className="form-label">Experience *</label>
@@ -247,7 +310,6 @@ export default function AdminDoctors() {
                   </div>
                 </div>
 
-                {/* Availability toggle */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0' }}>
                   <label className="form-label" style={{ margin: 0 }}>Available for Appointments</label>
                   <div
@@ -269,6 +331,124 @@ export default function AdminDoctors() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {showSlotsModal && selectedDocId && (
+        <div className="modal-overlay" onClick={e => { if (e.target === e.currentTarget) closeSlotsModal(); }}>
+          <div className="modal" style={{ maxWidth: 700, maxHeight: '90vh', overflowY: 'auto' }}>
+            <div className="modal-header">
+              <span className="modal-title">
+                Manage Slots - {doctors.find(d => d.id === selectedDocId)?.name || 'Doctor'}
+              </span>
+              <button className="icon-btn" onClick={closeSlotsModal}><X size={16} /></button>
+            </div>
+
+            <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div style={{ padding: '16px', borderRadius: '8px', background: '#F8FAFC', border: '1px solid #E2E8F0' }}>
+                <h3 style={{ margin: '0 0 12px 0', fontSize: '0.9rem', fontWeight: 600, color: '#0F172A' }}>Add New Slot</h3>
+                <form onSubmit={handleAddSlot} style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+                  <div className="form-group" style={{ marginBottom: 0, flex: '1 1 120px' }}>
+                    <label className="form-label">Date *</label>
+                    <input
+                      type="date"
+                      className="form-input"
+                      value={slotForm.date}
+                      onChange={e => setSlotForm(f => ({ ...f, date: e.target.value }))}
+                    />
+                    {slotErrors.date && <span style={errText}>{slotErrors.date}</span>}
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0, flex: '1 1 100px' }}>
+                    <label className="form-label">Start Time *</label>
+                    <input
+                      type="time"
+                      className="form-input"
+                      value={slotForm.startTime}
+                      onChange={e => setSlotForm(f => ({ ...f, startTime: e.target.value }))}
+                    />
+                    {slotErrors.startTime && <span style={errText}>{slotErrors.startTime}</span>}
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0, flex: '1 1 100px' }}>
+                    <label className="form-label">End Time *</label>
+                    <input
+                      type="time"
+                      className="form-input"
+                      value={slotForm.endTime}
+                      onChange={e => setSlotForm(f => ({ ...f, endTime: e.target.value }))}
+                    />
+                    {slotErrors.endTime && <span style={errText}>{slotErrors.endTime}</span>}
+                  </div>
+                  <button type="submit" className="btn btn-primary btn-sm" style={{ marginBottom: 0 }}>
+                    <Plus size={13} /> Add
+                  </button>
+                </form>
+                {slotErrors.submit && <span style={{ ...errText, display: 'block', marginTop: 8 }}>{slotErrors.submit}</span>}
+              </div>
+
+              <div>
+                <h3 style={{ margin: '0 0 12px 0', fontSize: '0.9rem', fontWeight: 600, color: '#0F172A' }}>
+                  Available Slots ({slots.length})
+                </h3>
+                {slotsLoading ? (
+                  <div style={{ textAlign: 'center', padding: '20px', color: '#94A3B8' }}>Loading slots...</div>
+                ) : slots.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '20px', color: '#94A3B8', fontSize: '0.85rem' }}>
+                    No slots available. Add one above.
+                  </div>
+                ) : (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12 }}>
+                    {slots.map(slot => (
+                      <div
+                        key={slot.slotId}
+                        style={{
+                          padding: '12px',
+                          borderRadius: '8px',
+                          border: '1px solid #E2E8F0',
+                          background: slot.available ? '#F0FDFA' : '#F1F5F9',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-start',
+                          gap: 8
+                        }}
+                      >
+                        <div style={{ fontSize: '0.82rem', flex: 1 }}>
+                          <div style={{ fontWeight: 600, color: '#0F172A', marginBottom: 4 }}>
+                            {new Date(slot.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                          </div>
+                          <div style={{ color: '#64748B', fontSize: '0.78rem' }}>
+                            {slot.startTime} - {slot.endTime}
+                          </div>
+                          <div style={{
+                            marginTop: 4,
+                            display: 'inline-block',
+                            padding: '2px 8px',
+                            borderRadius: 4,
+                            fontSize: '0.7rem',
+                            fontWeight: 600,
+                            color: slot.available ? '#16A34A' : '#94A3B8',
+                            background: slot.available ? '#DCFCE7' : '#F1F5F9'
+                          }}>
+                            {slot.available ? 'Available' : 'Booked'}
+                          </div>
+                        </div>
+                        <button
+                          className="btn btn-ghost btn-sm"
+                          style={{ padding: '4px', color: '#EF4444' }}
+                          onClick={() => handleDeleteSlot(slot.slotId)}
+                          title="Delete slot"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-outline" onClick={closeSlotsModal}>Close</button>
+            </div>
           </div>
         </div>
       )}

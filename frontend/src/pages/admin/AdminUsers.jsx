@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { USERS_LIST } from '../../utils/mockData';
+import { useState, useEffect } from 'react';
+import useAllUsers from '../../hooks/useAllUsers';
+import { api } from '../../services/api';
 import { Search, Plus, MoreHorizontal, UserCheck, Users, Shield, X } from 'lucide-react';
 
 const roleBadge = r => {
@@ -18,7 +19,8 @@ const ROLE_TABS = ['All', 'PATIENT', 'DOCTOR', 'ADMIN'];
 const EMPTY_FORM = { name: '', email: '', role: 'PATIENT', status: 'ACTIVE', password: '' };
 
 export default function AdminUsers() {
-  const [users, setUsers]       = useState(USERS_LIST);
+  const { users: usersData } = useAllUsers();
+  const [users, setUsers]       = useState([]);
   const [search, setSearch]     = useState('');
   const [roleTab, setRoleTab]   = useState('All');
   const [showModal, setShowModal] = useState(false);
@@ -26,6 +28,10 @@ export default function AdminUsers() {
   const [errors, setErrors]     = useState({});
   const [saving, setSaving]     = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
+
+  useEffect(() => {
+    setUsers(usersData);
+  }, [usersData]);
 
   const filtered = users.filter(u => {
     const mr = roleTab === 'All' || u.role === roleTab;
@@ -50,7 +56,7 @@ export default function AdminUsers() {
     const e2 = validate();
     if (Object.keys(e2).length) { setErrors(e2); return; }
     setSaving(true);
-    await new Promise(r => setTimeout(r, 800)); // simulate API
+    await new Promise(r => setTimeout(r, 800)); 
     const newUser = {
       id:     'u' + Date.now(),
       name:   form.name.trim(),
@@ -72,14 +78,12 @@ export default function AdminUsers() {
 
   return (
     <div>
-      {/* Success toast */}
       {successMsg && (
         <div style={toast}>
           ✓ {successMsg}
         </div>
       )}
 
-      {/* Summary tiles */}
       <div className="stats-grid" style={{ marginBottom: 24 }}>
         {[
           { label: 'Total Users', value: users.length,                              icon: Users,     color: '#2563EB', bg: '#EFF6FF' },
@@ -101,7 +105,6 @@ export default function AdminUsers() {
       </div>
 
       <div className="card fade-up">
-        {/* Toolbar */}
         <div style={{ display: 'flex', gap: 12, padding: '16px 20px', borderBottom: '1px solid #F1F5F9', flexWrap: 'wrap', alignItems: 'center' }}>
           <div className="search-wrap" style={{ flex: 1, minWidth: 200 }}>
             <Search size={15} />
@@ -119,7 +122,6 @@ export default function AdminUsers() {
           </button>
         </div>
 
-        {/* Table */}
         <div className="table-wrap">
           <table>
             <thead>
@@ -160,7 +162,6 @@ export default function AdminUsers() {
         </div>
       </div>
 
-      {/* Add User Modal */}
       {showModal && (
         <div className="modal-overlay" onClick={e => { if (e.target === e.currentTarget) closeModal(); }}>
           <div className="modal">
@@ -171,7 +172,6 @@ export default function AdminUsers() {
             <form onSubmit={handleSubmit}>
               <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
 
-                {/* Full Name */}
                 <div className="form-group">
                   <label className="form-label">Full Name *</label>
                   <input
@@ -183,7 +183,6 @@ export default function AdminUsers() {
                   {errors.name && <span style={errText}>{errors.name}</span>}
                 </div>
 
-                {/* Email */}
                 <div className="form-group">
                   <label className="form-label">Email Address *</label>
                   <input
@@ -196,7 +195,6 @@ export default function AdminUsers() {
                   {errors.email && <span style={errText}>{errors.email}</span>}
                 </div>
 
-                {/* Password */}
                 <div className="form-group">
                   <label className="form-label">Password *</label>
                   <input
@@ -209,7 +207,6 @@ export default function AdminUsers() {
                   {errors.password && <span style={errText}>{errors.password}</span>}
                 </div>
 
-                {/* Role + Status */}
                 <div className="grid-2" style={{ gap: 12 }}>
                   <div className="form-group" style={{ marginBottom: 0 }}>
                     <label className="form-label">Role *</label>

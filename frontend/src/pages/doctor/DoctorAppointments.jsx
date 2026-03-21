@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { APPOINTMENTS } from '../../utils/mockData';
+import useAppointments from '../../hooks/useAppointments';
+import { useAuth } from '../../context/Authcontext';
 import { Search, CalendarDays, Clock } from 'lucide-react';
 
 const badge = s => {
@@ -10,17 +11,22 @@ const badge = s => {
 
 const TABS = ['All', 'Today', 'Upcoming', 'Completed', 'Cancelled'];
 
+const getTodayDate = () => new Date().toISOString().split('T')[0];
+
 export default function DoctorAppointments() {
+  const { user } = useAuth();
+  const { appointments, loading } = useAppointments();
   const [tab, setTab]       = useState('All');
   const [search, setSearch] = useState('');
 
-  const mine = APPOINTMENTS.filter(a => a.doctorId === 'd1');
+  const mine = appointments.filter(a => a.doctorId === user?.userId);
 
   const filtered = mine.filter(a => {
+    const todayDate = getTodayDate();
     const matchTab =
       tab === 'All' ||
-      (tab === 'Today'     && a.date === '2026-03-21') ||
-      (tab === 'Upcoming'  && (a.status === 'CONFIRMED' || a.status === 'PENDING') && a.date > '2026-03-21') ||
+      (tab === 'Today'     && a.date === todayDate) ||
+      (tab === 'Upcoming'  && (a.status === 'CONFIRMED' || a.status === 'PENDING') && a.date > todayDate) ||
       (tab === 'Completed' && a.status === 'COMPLETED') ||
       (tab === 'Cancelled' && a.status === 'CANCELLED');
     const matchSearch = a.patientName.toLowerCase().includes(search.toLowerCase());

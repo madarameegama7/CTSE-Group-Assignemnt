@@ -38,7 +38,6 @@ public class DoctorController {
         return ResponseEntity.ok(doctorService.getDoctorSlots(doctorId));
     }
 
-    // For appointment-service integration
     @GetMapping("/{doctorId}/slots/{slotId}")
     public ResponseEntity<Map<String, Object>> checkSlot(@PathVariable Long doctorId,
                                                          @PathVariable Long slotId) {
@@ -46,7 +45,6 @@ public class DoctorController {
         return ResponseEntity.ok(Map.of("slotId", slotId, "available", available));
     }
 
-    // For appointment-service integration (reserve slot)
     @PutMapping("/{doctorId}/slots/{slotId}/reserve")
     public ResponseEntity<Map<String, String>> reserve(@PathVariable Long doctorId,
                                                        @PathVariable Long slotId) {

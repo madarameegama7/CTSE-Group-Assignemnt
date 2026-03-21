@@ -31,7 +31,6 @@ const typeColor = t => {
 export default function MedicalRecords() {
   return (
     <div>
-      {/* Vitals */}
       <div className="stats-grid" style={{ marginBottom:24 }}>
         {VITALS.map(v => (
           <div className="stat-tile fade-up" key={v.label}>
@@ -45,7 +44,6 @@ export default function MedicalRecords() {
         ))}
       </div>
 
-      {/* Records */}
       <div className="card fade-up">
         <div className="card-header">
           <span className="card-title">Documents & Reports</span>

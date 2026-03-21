@@ -9,10 +9,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
-/**
- * Auth Service Client
- * Communicates with Auth Service via API Gateway
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -23,9 +19,6 @@ public class AuthServiceClient {
     @Value("${auth.service.url:http://localhost:8080/api/auth}")
     private String authServiceUrl;
 
-    /**
-     * Validate JWT token with Auth Service
-     */
     public Mono<AuthValidationResponse> validateToken(String token) {
         return webClient.get()
                 .uri("/auth/validate")
@@ -42,9 +35,7 @@ public class AuthServiceClient {
                 .onErrorReturn(new AuthValidationResponse(false, null, null));
     }
 
-    /**
-     * Verify user role with Auth Service
-     */
+
     public Mono<Boolean> verifyUserRole(String userId, String requiredRole) {
         return webClient.get()
                 .uri("/auth/verify-role?userId={userId}&role={role}", userId, requiredRole)

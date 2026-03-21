@@ -1,32 +1,40 @@
 import React, { useState } from 'react';
-import { APPOINTMENTS } from '../../utils/mockData';
+import usePatientAppointments from '../../hooks/usePatientAppointments';
+import { api } from '../../services/api';
 import { CalendarDays, Clock, DollarSign, CreditCard, Banknote, CheckCircle, ChevronRight } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/Authcontext';
 
 export default function MakePayments() {
   const { user } = useAuth();
-  // using Mock data for patient 'p1' if user doesn't have an ID yet, though useAuth provides user
-  const patientAppointments = APPOINTMENTS.filter(a => a.patientId === (user?.id || 'p1') && (a.status === 'CONFIRMED' || a.status === 'PENDING'));
+  const { appointments: patientAppointments, loading, refresh } = usePatientAppointments();
   
   const [selectedAppt, setSelectedAppt] = useState(null);
   const [method, setMethod] = useState('CARD');
-  const [paidAppts, setPaidAppts] = useState([]); // track local mock payments
+  const [paidAppts, setPaidAppts] = useState([]); 
   const [isProcessing, setIsProcessing] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   
-  const availableAppts = patientAppointments.filter(a => !paidAppts.includes(a.id));
+  const availableAppts = (patientAppointments || []).filter(a => !paidAppts.includes(a.id) && (a.status === 'CONFIRMED' || a.status === 'PENDING'));
 
-  const handlePayment = (e) => {
+  const handlePayment = async (e) => {
     e.preventDefault();
     if (!selectedAppt) return;
     
     setIsProcessing(true);
-    // Mock processing
-    setTimeout(() => {
-      setIsProcessing(false);
+    try {
+      await api.post('/payments', {
+        appointmentId: parseInt(selectedAppt.id),
+        amount: parseFloat(selectedAppt.fee || 150),
+        paymentMethod: method
+      });
       setPaidAppts([...paidAppts, selectedAppt.id]);
       setShowPopup(true);
-    }, 800);
+      refresh();
+    } catch (error) {
+      alert("Payment Failed: " + error.message);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const closePopup = () => {
@@ -36,7 +44,6 @@ export default function MakePayments() {
 
   return (
     <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-      {/* Left Column: Appointments List */}
       <div style={{ flex: '1 1 400px', display: 'flex', flexDirection: 'column', gap: 16 }}>
         <h2 style={{ fontSize: '1.1rem', margin: 0, color: '#0F172A', fontWeight: 600 }}>Select an Appointment</h2>
         {availableAppts.length === 0 ? (
@@ -80,7 +87,6 @@ export default function MakePayments() {
         )}
       </div>
 
-      {/* Right Column: Payment Details Form */}
       <div className="card fade-up" style={{ flex: '1 1 350px', position: 'sticky', top: 24, padding: '24px' }}>
         <h2 style={{ fontSize: '1.1rem', margin: '0 0 20px', color: '#0F172A', fontWeight: 600 }}>Payment Details</h2>
         
@@ -159,7 +165,6 @@ export default function MakePayments() {
         )}
       </div>
 
-      {/* User Friendly Success Popup */}
       {showPopup && (
         <div style={{
           position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',

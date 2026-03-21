@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/Authcontext';
-import { APPOINTMENTS } from '../../utils/mockData';
+import usePatientAppointments from '../../hooks/usePatientAppointments';
 import useDoctors from '../../hooks/useDoctors';
 import {
   CalendarDays, Clock, CheckCircle2, Search,
@@ -19,8 +19,8 @@ export default function PatientDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { doctors: docsData } = useDoctors();
-  const myAppts = APPOINTMENTS.filter(a => a.patientId === 'p1');
-  const upcoming = myAppts.filter(a => a.status === 'CONFIRMED' || a.status === 'PENDING');
+  const { appointments: myAppts, loading } = usePatientAppointments();
+  const upcoming = loading ? [] : myAppts.filter(a => a.status === 'CONFIRMED' || a.status === 'PENDING');
   const next = upcoming[0];
 
   const stats = [
@@ -31,7 +31,6 @@ export default function PatientDashboard() {
 
   return (
     <div>
-      {/* Welcome banner */}
       <div style={banner}>
         <div>
           <h2 style={bannerTitle}>Good morning, {user?.name?.split(' ')[0]} 👋</h2>
@@ -42,7 +41,6 @@ export default function PatientDashboard() {
         </button>
       </div>
 
-      {/* Stats */}
       <div className="stats-grid" style={{ marginBottom: 24 }}>
         {stats.map(s => {
           const Icon = s.icon;
@@ -59,7 +57,6 @@ export default function PatientDashboard() {
       </div>
 
       <div className="grid-2" style={{ gap: 20 }}>
-        {/* Next appointment */}
         <div className="card fade-up">
           <div className="card-header">
             <span className="card-title">Next Appointment</span>
@@ -100,16 +97,15 @@ export default function PatientDashboard() {
           </div>
         </div>
 
-        {/* Recent history */}
         <div className="card fade-up">
           <div className="card-header">
             <span className="card-title">Recent History</span>
           </div>
           <div className="card-body" style={{ padding: '0 0 8px' }}>
-            {myAppts.slice(0, 4).map(a => (
+            {loading ? <p style={{padding: '12px 20px', color: '#64748B', fontSize: '0.85rem'}}>Loading...</p> : myAppts.slice(0, 4).map(a => (
               <div key={a.id} style={historyItem}>
                 <div className="doc-avatar" style={{ background: '#F1F5F9', color: '#475569' }}>
-                  {a.doctorName.split(' ').map(w => w[0]).join('').slice(0, 2)}
+                  {(a.doctorName || 'DR').split(' ').map(w => w[0]).join('').slice(0, 2)}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#1E293B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{a.doctorName}</div>
@@ -122,7 +118,6 @@ export default function PatientDashboard() {
         </div>
       </div>
 
-      {/* Top doctors */}
       <div className="card fade-up" style={{ marginTop: 20 }}>
         <div className="card-header">
           <span className="card-title">Recommended Doctors</span>

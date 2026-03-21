@@ -1,10 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider, useAuth } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "./context/Authcontext";
 
-// Pages
 import Login from "./pages/Login";
+import Register from "./pages/Register";
 
-// Patient
 import PatientLayout from "./pages/patient/PatientLayout";
 import PatientDashboard from "./pages/patient/PatientDashboard";
 import PatientAppointments from "./pages/patient/PatientAppointments";
@@ -12,14 +11,12 @@ import FindDoctors from "./pages/patient/FindDoctors";
 import MedicalRecords from "./pages/patient/MedicalRecords";
 import MakePayments from "./pages/patient/MakePayments";
 
-// Doctor
 import DoctorLayout from "./pages/doctor/DoctorLayout";
 import DoctorDashboard from "./pages/doctor/DoctorDashboard";
 import DoctorAppointments from "./pages/doctor/DoctorAppointments";
 import DoctorPatients from "./pages/doctor/DoctorPatients";
 import DoctorSchedule from "./pages/doctor/DoctorSchedule";
 
-// Admin
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsers from "./pages/admin/AdminUsers";
@@ -46,11 +43,10 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          {/* Root redirect */}
           <Route path="/" element={<RootRedirect />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
 
-          {/* ── Patient Portal ── */}
           <Route
             path="/patient"
             element={
@@ -67,7 +63,6 @@ function App() {
             <Route path="make-payments" element={<MakePayments />} />
           </Route>
 
-          {/* ── Doctor Portal ── */}
           <Route
             path="/doctor"
             element={
@@ -83,7 +78,6 @@ function App() {
             <Route path="schedule" element={<DoctorSchedule />} />
           </Route>
 
-          {/* ── Admin Portal ── */}
           <Route
             path="/admin"
             element={
@@ -101,7 +95,6 @@ function App() {
             <Route path="reports" element={<AdminReports />} />
           </Route>
 
-          {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

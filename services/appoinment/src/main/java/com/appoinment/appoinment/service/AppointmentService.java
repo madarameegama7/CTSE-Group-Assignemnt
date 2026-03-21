@@ -16,12 +16,10 @@ public class AppointmentService {
 
     private final AppointmentRepository appointmentRepository;
 
-    // Get all appointments
     public List<Appointment> getAllAppointments() {
         return appointmentRepository.findAll();
     }
 
-    // Book a new appointment
     public Appointment bookAppointment(AppointmentRequest request) {
         Appointment appointment = Appointment.builder()
                 .patientId(request.getPatientId())
@@ -33,12 +31,10 @@ public class AppointmentService {
         return appointmentRepository.save(appointment);
     }
 
-    // Get all appointments for a specific patient
     public List<Appointment> getAppointmentsByPatient(Long patientId) {
         return appointmentRepository.findByPatientId(patientId);
     }
 
-    // Cancel an appointment (sets status to CANCELLED)
     public Appointment cancelAppointment(Long appointmentId) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new RuntimeException("Appointment not found with id: " + appointmentId));
@@ -46,7 +42,6 @@ public class AppointmentService {
         return appointmentRepository.save(appointment);
     }
 
-    // Update the status of an appointment
     public Appointment updateStatus(Long appointmentId, StatusUpdateRequest request) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new RuntimeException("Appointment not found with id: " + appointmentId));
@@ -54,7 +49,6 @@ public class AppointmentService {
         return appointmentRepository.save(appointment);
     }
 
-    // Get appointment details by AppointmentId - Added by Ashika
     public Appointment getAppointmentById(Long id) {
         return appointmentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));

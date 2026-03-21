@@ -4,9 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * Doctor slot information from Doctor Service
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
