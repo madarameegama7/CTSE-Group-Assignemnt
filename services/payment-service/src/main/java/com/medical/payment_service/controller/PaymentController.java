@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/payments")
@@ -30,34 +29,34 @@ public class PaymentController {
 
     @Operation(summary = "Get payment by ID")
     @GetMapping("/{paymentId}")
-    public ResponseEntity<PaymentResponse> getPaymentById(@PathVariable UUID paymentId) {
+    public ResponseEntity<PaymentResponse> getPaymentById(@PathVariable int paymentId) {
         return ResponseEntity.ok(paymentService.getPaymentById(paymentId));
     }
 
     @Operation(summary = "Get payments by patient ID")
     @GetMapping("/patient/{patientId}")
-    public ResponseEntity<List<PaymentResponse>> getPaymentsByPatientId(@PathVariable UUID patientId) {
+    public ResponseEntity<List<PaymentResponse>> getPaymentsByPatientId(@PathVariable int patientId) {
         return ResponseEntity.ok(paymentService.getPaymentsByPatientId(patientId));
     }
 
     @Operation(summary = "Get payments by appointment ID")
     @GetMapping("/appointment/{appointmentId}")
-    public ResponseEntity<List<PaymentResponse>> getPaymentsByAppointmentId(@PathVariable UUID appointmentId) {
+    public ResponseEntity<List<PaymentResponse>> getPaymentsByAppointmentId(@PathVariable int appointmentId) {
         return ResponseEntity.ok(paymentService.getPaymentsByAppointmentId(appointmentId));
     }
 
     @Operation(summary = "Update payment details")
     @PutMapping("/{paymentId}")
     public ResponseEntity<PaymentResponse> updatePayment(
-            @PathVariable UUID paymentId,
+            @PathVariable int paymentId,
             @Valid @RequestBody UpdatePaymentRequest request) {
         return ResponseEntity.ok(paymentService.updatePayment(paymentId, request));
     }
 
-    @Operation(summary = "Update payment status to SUCCESS or FAILED")
+    @Operation(summary = "Update payment status")
     @PutMapping("/{paymentId}/status")
     public ResponseEntity<PaymentResponse> updatePaymentStatus(
-            @PathVariable UUID paymentId,
+            @PathVariable int paymentId,
             @Valid @RequestBody UpdatePaymentStatusRequest request) {
         return ResponseEntity.ok(paymentService.updatePaymentStatus(paymentId, request));
     }

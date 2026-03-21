@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -26,7 +25,7 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final AppointmentClient appointmentClient;
 
-    // Create Payment
+    // Create payment
     public PaymentResponse createPayment(CreatePaymentRequest request) {
         AppointmentResponse appointment;
 
@@ -54,24 +53,24 @@ public class PaymentService {
         return mapToResponse(savedPayment);
     }
 
-    // Get payment details by ID
-    public PaymentResponse getPaymentById(UUID paymentId) {
+    // Get payment by payment ID
+    public PaymentResponse getPaymentById(int paymentId) {
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new PaymentNotFoundException("Payment not found with ID: " + paymentId));
 
         return mapToResponse(payment);
     }
 
-    // Get payment details by Patient ID
-    public List<PaymentResponse> getPaymentsByPatientId(UUID patientId) {
+    // Get payments by patient ID
+    public List<PaymentResponse> getPaymentsByPatientId(int patientId) {
         return paymentRepository.findByPatientId(patientId)
                 .stream()
                 .map(this::mapToResponse)
                 .toList();
     }
 
-    // Get payment details by Appointment ID
-    public List<PaymentResponse> getPaymentsByAppointmentId(UUID appointmentId) {
+    // Get payments by appointment ID
+    public List<PaymentResponse> getPaymentsByAppointmentId(int appointmentId) {
         return paymentRepository.findByAppointmentId(appointmentId)
                 .stream()
                 .map(this::mapToResponse)
@@ -79,9 +78,14 @@ public class PaymentService {
     }
 
     // Update payment details
-    public PaymentResponse updatePayment(UUID paymentId, UpdatePaymentRequest request) {
+    public PaymentResponse updatePayment(int paymentId, UpdatePaymentRequest request) {
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new PaymentNotFoundException("Payment not found with ID: " + paymentId));
+
+        // patient can update only while pending
+        if (payment.getPaymentStatus() != PaymentStatus.PENDING) {
+            throw new IllegalStateException("Payment details can only be updated while status is PENDING.");
+        }
 
         if (request.getAmount() != null) {
             payment.setAmount(request.getAmount());
@@ -91,17 +95,13 @@ public class PaymentService {
             payment.setPaymentMethod(request.getPaymentMethod());
         }
 
-        if (request.getPaymentStatus() != null) {
-            payment.setPaymentStatus(request.getPaymentStatus());
-        }
-
         Payment updatedPayment = paymentRepository.save(payment);
 
         return mapToResponse(updatedPayment);
     }
 
     // Update payment status
-    public PaymentResponse updatePaymentStatus(UUID paymentId, UpdatePaymentStatusRequest request) {
+    public PaymentResponse updatePaymentStatus(int paymentId, UpdatePaymentStatusRequest request) {
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new PaymentNotFoundException("Payment not found with ID: " + paymentId));
 

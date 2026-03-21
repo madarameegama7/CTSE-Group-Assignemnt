@@ -19,5 +19,4 @@ public class UpdatePaymentRequest {
 
     private PaymentMethod paymentMethod;
 
-    private PaymentStatus paymentStatus;
 }

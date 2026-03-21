@@ -5,7 +5,6 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Table(name = "payments")
@@ -17,14 +16,14 @@ import java.util.UUID;
 public class Payment {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID paymentId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int paymentId;
 
     @Column(nullable = false)
-    private UUID appointmentId;
+    private int appointmentId;
 
     @Column(nullable = false)
-    private UUID patientId;
+    private int patientId;
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal amount;
