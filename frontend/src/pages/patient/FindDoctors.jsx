@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { DOCTORS, SLOTS } from '../../utils/mockData';
+import { SLOTS } from '../../utils/mockData';
+import useDoctors from '../../hooks/useDoctors';
+import { useAuth } from '../../context/Authcontext';
 import { Search, Star, Filter, X, CalendarDays, Clock, CheckCircle2 } from 'lucide-react';
 
 const SPECIALTIES = ['All','Cardiologist','Neurologist','Orthopedic','Dermatologist','Pediatrician','Psychiatrist'];
@@ -13,17 +15,89 @@ export default function FindDoctors() {
   const [selDate, setSelDate]   = useState('2026-03-25');
   const [apptType, setApptType] = useState('Consultation');
 
-  const docs = DOCTORS.filter(d => {
+  const { user } = useAuth();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+
+  const { doctors: docsData, loading } = useDoctors();
+
+  const docs = docsData.filter(d => {
     const ms = spec === 'All' || d.specialty === spec;
     const mq = d.name.toLowerCase().includes(search.toLowerCase()) || d.specialty.toLowerCase().includes(search.toLowerCase());
     return ms && mq;
   });
 
-  const openBooking = doc => { setBooking(doc); setStep(1); setSelSlot(null); };
-  const closeBooking = () => { setBooking(null); setStep(1); };
-  const handleBook = () => {
+  const openBooking = doc => { setBooking(doc); setStep(1); setSelSlot(null); setErrorMsg(''); };
+  const closeBooking = () => { setBooking(null); setStep(1); setErrorMsg(''); };
+
+  const formatTime = (t) => {
+    if (!t) return '00:00';
+    let [time, modifier] = t.split(' ');
+    let [hours, minutes] = time.split(':');
+    if (hours === '12') hours = '00';
+    if (modifier === 'PM') hours = parseInt(hours, 10) + 12;
+    return `${hours.toString().padStart(2, '0')}:${minutes}`;
+  };
+
+  const handleBook = async () => {
     if (step === 1 && selSlot) setStep(2);
-    else if (step === 2) setStep(3);
+    else if (step === 2) {
+      if (!user) {
+        setErrorMsg('Please log in to confirm booking.');
+        return;
+      }
+      setIsProcessing(true);
+      setErrorMsg('');
+      try {
+        const token = localStorage.getItem('token');
+        
+        // 1. Create Appointment
+        const apptRes = await fetch('/api/appointments', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` 
+          },
+          body: JSON.stringify({
+            patientId: user.userId,
+            doctorId: parseInt(booking.id),
+            date: selDate,
+            time: formatTime(selSlot.time)
+          })
+        });
+        
+        if (!apptRes.ok) {
+          const text = await apptRes.text();
+          throw new Error(text || 'Failed to create appointment');
+        }
+        const apptData = await apptRes.json();
+        
+        // 2. Create Payment
+        const payRes = await fetch('/api/payments', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            appointmentId: apptData.id || apptData.appointmentId,
+            amount: booking.fee,
+            paymentMethod: "CARD"
+          })
+        });
+        
+        if (!payRes.ok) {
+          const text = await payRes.text();
+          throw new Error(text || 'Failed to process payment');
+        }
+        
+        setStep(3);
+      } catch (err) {
+        setErrorMsg(err.message);
+      } finally {
+        setIsProcessing(false);
+      }
+    }
   };
 
   return (
@@ -40,7 +114,9 @@ export default function FindDoctors() {
         <button className="btn btn-outline"><Filter size={14} /> Filter</button>
       </div>
 
-      <p style={{ fontSize:'0.8rem', color:'#94A3B8', marginBottom:16 }}>{docs.length} doctors found</p>
+      <p style={{ fontSize:'0.8rem', color:'#94A3B8', marginBottom:16 }}>
+        {loading ? 'Loading doctors...' : `${docs.length} doctors found`}
+      </p>
 
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))', gap:16 }}>
         {docs.map(doc => (
@@ -143,6 +219,7 @@ export default function FindDoctors() {
                   <div style={confirmRow}><span>Time</span><strong>{selSlot?.time}</strong></div>
                   <div style={confirmRow}><span>Type</span><strong>{apptType}</strong></div>
                   <div style={confirmRow}><span>Fee</span><strong>${booking.fee}</strong></div>
+                  {errorMsg && <div style={{ color:'#EF4444', fontSize:'0.85rem', textAlign:'center', marginTop:10, padding:'8px', background:'#FEF2F2', borderRadius:'6px' }}>{errorMsg}</div>}
                 </div>
               )}
 
@@ -162,11 +239,11 @@ export default function FindDoctors() {
 
             {step < 3 && (
               <div className="modal-footer">
-                <button className="btn btn-outline" onClick={step===1 ? closeBooking : ()=>setStep(1)}>
+                <button className="btn btn-outline" disabled={isProcessing} onClick={step===1 ? closeBooking : ()=>setStep(1)}>
                   {step===1 ? 'Cancel' : 'Back'}
                 </button>
-                <button className="btn btn-primary" onClick={handleBook} disabled={step===1&&!selSlot}>
-                  {step===1 ? 'Continue' : 'Confirm Booking'}
+                <button className="btn btn-primary" onClick={handleBook} disabled={(step===1&&!selSlot) || isProcessing}>
+                  {isProcessing ? 'Processing...' : (step===1 ? 'Continue' : 'Confirm & Pay')}
                 </button>
               </div>
             )}
