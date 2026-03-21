@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { api } from '../services/api';
 
 export default function useDoctors() {
   const [doctors, setDoctors] = useState([]);
@@ -8,23 +9,20 @@ export default function useDoctors() {
   useEffect(() => {
     async function fetchDoctors() {
       try {
-        const res = await fetch('/api/doctors');
-        if (!res.ok) throw new Error('Failed to fetch doctors');
-        const data = await res.json();
-        
-        // Map backend DoctorResponse to frontend DOCTORS format
+        const data = await api.get('/doctors');
+
         const mapped = data.map(d => ({
           id: d.doctorId.toString(),
           name: d.name,
           specialty: d.specialization,
           department: d.hospital || 'General',
-          experience: '10 yrs', // Fallback for UI
-          rating: 4.8, // Fallback for UI
-          reviews: 120, // Fallback for UI
-          fee: 150, // Fallback for UI
+          experience: '10 yrs', 
+          rating: 4.8, 
+          reviews: 120, 
+          fee: 150, 
           avatar: d.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(),
           available: true,
-          nextSlot: 'Tomorrow 10:00 AM' // Fallback for UI
+          nextSlot: 'View Calendar' 
         }));
         
         setDoctors(mapped);

@@ -1,17 +1,20 @@
-import React, { useState } from "react";
-import { APPOINTMENTS, USERS_LIST } from "../../utils/mockData";
+import React, { useState, useEffect } from "react";
+import useAllAppointments from "../../hooks/useAllAppointments";
+import { api } from "../../services/api";
 import { Check, X, Eye, DollarSign, CreditCard } from "lucide-react";
 
 const badgeClass = (status) => {
   const colorMap = {
     PENDING: "badge-amber",
     VERIFIED: "badge-green",
+    COMPLETED: "badge-green",
     FAILED: "badge-slate",
   };
 
   const labelMap = {
     PENDING: "Pending",
     VERIFIED: "Verified",
+    COMPLETED: "Completed",
     FAILED: "Failed",
   };
 
@@ -22,70 +25,57 @@ const badgeClass = (status) => {
   );
 };
 
-const SAMPLE_PAYMENTS = [
-  {
-    id: "pay1",
-    appointmentId: "a1",
-    patientName: "Sarah Mitchell",
-    doctorName: "Dr. James Harlow",
-    date: "2026-03-22",
-    time: "10:00 AM",
-    amount: 150,
-    method: "Card (Visa)",
-    status: "PENDING",
-    txId: "TXN-20260322-001",
-    paidAt: "2026-03-20 14:12",
-    invoice: "INV-1001",
-  },
-  {
-    id: "pay3",
-    appointmentId: "a6",
-    patientName: "David Kim",
-    doctorName: "Dr. James Harlow",
-    date: "2026-03-23",
-    time: "3:00 PM",
-    amount: 150,
-    method: "Cash",
-    status: "FAILED",
-    txId: "TXN-20260323-100",
-    paidAt: "2026-03-22 11:02",
-    invoice: "INV-1003",
-  },
-  {
-    id: "pay4",
-    appointmentId: "a8",
-    patientName: "Michael Brown",
-    doctorName: "Dr. James Harlow",
-    date: "2026-03-20",
-    time: "2:00 PM",
-    amount: 150,
-    method: "Card (Mastercard)",
-    status: "PENDING",
-    txId: "TXN-20260320-077",
-    paidAt: "2026-03-19 16:40",
-    invoice: "INV-1004",
-  },
-];
-
 export default function VerifyPayments() {
-  const [payments, setPayments] = useState(SAMPLE_PAYMENTS);
+  const { appointments } = useAllAppointments();
+  const [payments, setPayments] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(null);
   const [pendingAction, setPendingAction] = useState(null);
 
+  useEffect(() => {
+    const fetchAllPayments = async () => {
+      try {
+        const data = await api.get('/payments');
+        const mapped = (data || []).map(p => ({
+          id: p.paymentId,
+          paymentId: p.paymentId,
+          appointmentId: p.appointmentId,
+          patientId: p.patientId,
+          patientName: p.patientName || `Patient #${p.patientId}`,
+          amount: p.amount,
+          status: p.status,
+          transactionId: p.transactionId || `TXN-${Date.now()}`,
+          paymentDate: p.paymentDate || new Date().toISOString().split('T')[0],
+          paymentType: p.paymentType || 'Online'
+        }));
+        setPayments(mapped);
+        setLoading(false);
+      } catch (err) {
+        console.error('Failed to fetch payments:', err);
+        setPayments([]);
+        setLoading(false);
+      }
+    };
+    fetchAllPayments();
+  }, []);
+
+  const updatePaymentStatus = async (paymentId, newStatus) => {
+    try {
+      await api.put(`/payments/${paymentId}/status`, { status: newStatus });
+      setPayments(prev =>
+        prev.map(p => p.id === paymentId ? { ...p, status: newStatus } : p)
+      );
+    } catch (err) {
+      console.error('Failed to update payment status:', err);
+    }
+  };
+
   const verify = (id) => {
-    setPayments((prev) =>
-      prev.map((payment) =>
-        payment.id === id ? { ...payment, status: "VERIFIED" } : payment,
-      ),
-    );
+    updatePaymentStatus(id, 'VERIFIED');
   };
 
   const fail = (id) => {
-    setPayments((prev) =>
-      prev.map((payment) =>
-        payment.id === id ? { ...payment, status: "FAILED" } : payment,
-      ),
-    );
+    updatePaymentStatus(id, 'FAILED');
   };
 
   const confirmAction = () => {
@@ -102,12 +92,12 @@ export default function VerifyPayments() {
   const openConfirm = (id, type) => setPendingAction({ id, type });
   const closeConfirm = () => setPendingAction(null);
 
-  const findAppointment = (appointmentId) =>
-    APPOINTMENTS.find((appointment) => appointment.id === appointmentId);
+  const findAppointment = (appointmentId) => {
+    return appointments.find(a => a.id === appointmentId || a.appointmentId === appointmentId);
+  };
 
   return (
     <div>
-      {/* Summary tiles */}
       <div className="stats-grid" style={{ marginBottom: 24 }}>
         {(() => {
           const total = payments.length;
@@ -187,24 +177,20 @@ export default function VerifyPayments() {
               </tr>
             </thead>
             <tbody>
-              {payments.map((p) => {
+              {payments.map(p => {
                 const appt = findAppointment(p.appointmentId) || {};
-                const patientEmail =
-                  USERS_LIST.find((u) => u.name === p.patientName)?.email || "—";
 
                 return (
                   <React.Fragment key={p.id}>
                     <tr>
-                      <td style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#94A3B8' }}>{p.txId}</td>
+                      <td style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#94A3B8' }}>{p.transactionId}</td>
                       <td style={{ fontWeight: 600, color: '#0F172A' }}>{p.patientName}</td>
                       <td style={{ color: '#64748B' }}>
                         {appt.type || "Appointment"}
-                        {appt.doctorName || p.doctorName
-                          ? ` • ${appt.doctorName || p.doctorName}`
-                          : ""}
+                        {appt.doctorName ? ` • ${appt.doctorName}` : ""}
                       </td>
                       <td style={{ color: '#64748B' }}>
-                        {p.date} • {p.time}
+                        {appt.date ? `${appt.date} • ${appt.time}` : p.paymentDate}
                       </td>
                       <td style={{ fontWeight: 700, color: '#0F172A' }}>${p.amount}</td>
                       <td>{badgeClass(p.status)}</td>
@@ -213,7 +199,7 @@ export default function VerifyPayments() {
                           <button
                             className="btn btn-success btn-sm"
                             onClick={() => openConfirm(p.id, "verify")}
-                            disabled={p.status === "VERIFIED"}
+                            disabled={p.status === "VERIFIED" || p.status === "COMPLETED"}
                             title="Verify"
                             style={{ padding: '6px' }}
                           >
@@ -231,7 +217,7 @@ export default function VerifyPayments() {
                           <button
                             className="btn btn-ghost btn-sm"
                             onClick={() =>
-                              setExpanded((current) =>
+                              setExpanded(current =>
                                 current === p.id ? null : p.id
                               )
                             }
@@ -249,26 +235,26 @@ export default function VerifyPayments() {
                           <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 16, fontSize: '0.875rem', textAlign: 'left' }}>
                             <div>
                               <div style={{ marginBottom: 8, display: 'flex' }}>
-                                <strong style={{ width: 140, color: '#475569' }}>Patient Email:</strong>
-                                <span style={{ color: '#0F172A' }}>{patientEmail}</span>
+                                <strong style={{ width: 140, color: '#475569' }}>Patient ID:</strong>
+                                <span style={{ color: '#0F172A' }}>{p.patientId}</span>
                               </div>
                               <div style={{ marginBottom: 8, display: 'flex' }}>
                                 <strong style={{ width: 140, color: '#475569' }}>Transaction ID:</strong>
-                                <span style={{ fontFamily: 'monospace', color: '#0F172A' }}>{p.txId}</span>
+                                <span style={{ fontFamily: 'monospace', color: '#0F172A' }}>{p.transactionId}</span>
                               </div>
                               <div style={{ display: 'flex' }}>
-                                <strong style={{ width: 140, color: '#475569' }}>Payment Method:</strong>
-                                <span style={{ color: '#0F172A' }}>{p.method}</span>
+                                <strong style={{ width: 140, color: '#475569' }}>Payment Type:</strong>
+                                <span style={{ color: '#0F172A' }}>{p.paymentType}</span>
                               </div>
                             </div>
                             <div>
                               <div style={{ marginBottom: 8, display: 'flex' }}>
-                                <strong style={{ width: 140, color: '#475569' }}>Paid At:</strong>
-                                <span style={{ color: '#0F172A' }}>{p.paidAt}</span>
+                                <strong style={{ width: 140, color: '#475569' }}>Payment Date:</strong>
+                                <span style={{ color: '#0F172A' }}>{p.paymentDate}</span>
                               </div>
                               <div style={{ marginBottom: 8, display: 'flex' }}>
-                                <strong style={{ width: 140, color: '#475569' }}>Invoice Number:</strong>
-                                <span style={{ color: '#0F172A' }}>{p.invoice}</span>
+                                <strong style={{ width: 140, color: '#475569' }}>Appointment ID:</strong>
+                                <span style={{ color: '#0F172A' }}>{p.appointmentId}</span>
                               </div>
                               <div style={{ display: 'flex' }}>
                                 <strong style={{ width: 140, color: '#475569' }}>Status:</strong>
@@ -282,6 +268,13 @@ export default function VerifyPayments() {
                   </React.Fragment>
                 );
               })}
+              {payments.length === 0 && (
+                <tr>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '32px', color: '#94A3B8' }}>
+                    No payments found
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

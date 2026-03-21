@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { SLOTS } from '../../utils/mockData';
+import { useState, useEffect } from 'react';
+import { useAuth } from '../../context/Authcontext';
+import { api } from '../../services/api';
 import { Clock, Save } from 'lucide-react';
 
 const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -14,9 +15,34 @@ const DEFAULT_HOURS = {
 };
 
 export default function DoctorSchedule() {
+  const { user } = useAuth();
   const [hours, setHours] = useState(DEFAULT_HOURS);
-  const [slots, setSlots] = useState(SLOTS);
+  const [slots, setSlots] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    const fetchSlots = async () => {
+      try {
+        const data = await api.get(`/doctors/${user?.userId}/slots`);
+        const mapped = data.map(s => ({
+          id: s.slotId,
+          time: s.startTime?.substring(0, 5) || s.time,
+          available: s.available,
+          date: s.date
+        }));
+        setSlots(mapped);
+      } catch (err) {
+        console.error('Failed to load slots:', err);
+        setSlots([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (user?.userId) {
+      fetchSlots();
+    }
+  }, [user?.userId]);
 
   const toggleDay  = d => setHours(h => ({ ...h, [d]: { ...h[d], active: !h[d].active } }));
   const changeFrom = (d,v) => setHours(h => ({ ...h, [d]: { ...h[d], from: v } }));
@@ -67,7 +93,6 @@ export default function DoctorSchedule() {
         </div>
       </div>
 
-      {/* Slot management */}
       <div className="card fade-up">
         <div className="card-header">
           <span className="card-title">Today's Slot Availability</span>

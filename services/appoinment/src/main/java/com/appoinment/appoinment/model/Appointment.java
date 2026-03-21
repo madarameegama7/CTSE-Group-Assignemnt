@@ -1,5 +1,6 @@
 package com.appoinment.appoinment.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -30,6 +31,7 @@ public class Appointment {
     @Column(nullable = false)
     private LocalDate date;
 
+    @JsonFormat(pattern = "HH:mm:ss")
     @Column(nullable = false)
     private LocalTime time;
 

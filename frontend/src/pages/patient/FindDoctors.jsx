@@ -1,23 +1,29 @@
 import { useState } from 'react';
-import { SLOTS } from '../../utils/mockData';
+
 import useDoctors from '../../hooks/useDoctors';
 import { useAuth } from '../../context/Authcontext';
+import { api } from '../../services/api';
 import { Search, Star, Filter, X, CalendarDays, Clock, CheckCircle2 } from 'lucide-react';
 
 const SPECIALTIES = ['All','Cardiologist','Neurologist','Orthopedic','Dermatologist','Pediatrician','Psychiatrist'];
 
+  const getTodayDate = () => new Date().toISOString().split('T')[0];
+
 export default function FindDoctors() {
   const [search, setSearch]     = useState('');
   const [spec, setSpec]         = useState('All');
-  const [booking, setBooking]   = useState(null); // doctor being booked
-  const [step, setStep]         = useState(1);    // 1=slot, 2=confirm, 3=done
+  const [booking, setBooking]   = useState(null); 
+  const [step, setStep]         = useState(1);    
   const [selSlot, setSelSlot]   = useState(null);
-  const [selDate, setSelDate]   = useState('2026-03-25');
+  const [selDate, setSelDate]   = useState(getTodayDate());
   const [apptType, setApptType] = useState('Consultation');
 
   const { user } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  
+  const [availableSlots, setAvailableSlots] = useState([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
 
   const { doctors: docsData, loading } = useDoctors();
 
@@ -27,16 +33,33 @@ export default function FindDoctors() {
     return ms && mq;
   });
 
-  const openBooking = doc => { setBooking(doc); setStep(1); setSelSlot(null); setErrorMsg(''); };
+  const loadSlots = async (docId, d) => {
+    setSlotsLoading(true); setSelSlot(null);
+    try {
+      const resp = await api.get(`/doctors/${docId}/slots`);
+      const filtered = resp.filter(s => s.date === d);
+      setAvailableSlots(filtered.map(s => ({
+        id: s.slotId,
+        time: s.startTime.substring(0, 5),
+        available: s.available
+      })));
+    } catch(err) {
+      setAvailableSlots([]);
+    } finally {
+      setSlotsLoading(false);
+    }
+  };
+
+  const openBooking = doc => { 
+    setBooking(doc); setStep(1); setSelSlot(null); setErrorMsg(''); 
+    loadSlots(doc.id, selDate);
+  };
   const closeBooking = () => { setBooking(null); setStep(1); setErrorMsg(''); };
 
-  const formatTime = (t) => {
-    if (!t) return '00:00';
-    let [time, modifier] = t.split(' ');
-    let [hours, minutes] = time.split(':');
-    if (hours === '12') hours = '00';
-    if (modifier === 'PM') hours = parseInt(hours, 10) + 12;
-    return `${hours.toString().padStart(2, '0')}:${minutes}`;
+  const handleDateChange = (e) => {
+    const d = e.target.value;
+    setSelDate(d);
+    if (booking) loadSlots(booking.id, d);
   };
 
   const handleBook = async () => {
@@ -49,47 +72,18 @@ export default function FindDoctors() {
       setIsProcessing(true);
       setErrorMsg('');
       try {
-        const token = localStorage.getItem('token');
-        
-        // 1. Create Appointment
-        const apptRes = await fetch('/api/appointments', {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}` 
-          },
-          body: JSON.stringify({
+        const apptData = await api.post('/appointments', {
             patientId: user.userId,
             doctorId: parseInt(booking.id),
             date: selDate,
-            time: formatTime(selSlot.time)
-          })
+            time: selSlot.time + ":00"
         });
         
-        if (!apptRes.ok) {
-          const text = await apptRes.text();
-          throw new Error(text || 'Failed to create appointment');
-        }
-        const apptData = await apptRes.json();
-        
-        // 2. Create Payment
-        const payRes = await fetch('/api/payments', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
+        await api.post('/payments', {
             appointmentId: apptData.id || apptData.appointmentId,
-            amount: booking.fee,
+            amount: parseFloat(booking.fee),
             paymentMethod: "CARD"
-          })
         });
-        
-        if (!payRes.ok) {
-          const text = await payRes.text();
-          throw new Error(text || 'Failed to process payment');
-        }
         
         setStep(3);
       } catch (err) {
@@ -102,7 +96,6 @@ export default function FindDoctors() {
 
   return (
     <div>
-      {/* Search + filter */}
       <div style={{ display:'flex', gap:12, marginBottom:20, flexWrap:'wrap' }}>
         <div className="search-wrap" style={{ flex:1, minWidth:220 }}>
           <Search size={15} />
@@ -143,7 +136,7 @@ export default function FindDoctors() {
                   <div style={{ fontWeight:700, fontSize:'1rem', color:'#0F172A' }}>${doc.fee}</div>
                 </div>
                 <div style={{ textAlign:'right' }}>
-                  <div style={{ fontSize:'0.72rem', color:'#94A3B8', marginBottom:2 }}>Next available</div>
+                  <div style={{ fontSize:'0.72rem', color:'#94A3B8', marginBottom:2 }}>Availability</div>
                   <span className={`badge ${doc.available ? 'badge-green' : 'badge-slate'}`} style={{ fontSize:'0.7rem' }}>{doc.nextSlot}</span>
                 </div>
               </div>
@@ -162,7 +155,6 @@ export default function FindDoctors() {
         ))}
       </div>
 
-      {/* Booking modal */}
       {booking && (
         <div className="modal-overlay" onClick={e => { if (e.target === e.currentTarget) closeBooking(); }}>
           <div className="modal" style={{ maxWidth: step===3 ? 400 : 520 }}>
@@ -181,7 +173,7 @@ export default function FindDoctors() {
                   <div className="grid-2" style={{ marginBottom:16 }}>
                     <div className="form-group" style={{ marginBottom:0 }}>
                       <label className="form-label">Date</label>
-                      <input type="date" className="form-input" value={selDate} onChange={e=>setSelDate(e.target.value)} />
+                      <input type="date" className="form-input" value={selDate} onChange={handleDateChange} />
                     </div>
                     <div className="form-group" style={{ marginBottom:0 }}>
                       <label className="form-label">Type</label>
@@ -191,8 +183,11 @@ export default function FindDoctors() {
                     </div>
                   </div>
                   <label className="form-label">Available Slots</label>
+                  
+                  {slotsLoading ? <p style={{fontSize:'0.8rem', color:'#64748B'}}>Loading slots...</p> : 
+                    availableSlots.length === 0 ? <p style={{fontSize:'0.8rem', color:'#EF4444'}}>No time slots found for this date.</p> :
                   <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:8 }}>
-                    {SLOTS.map(s => (
+                    {availableSlots.map(s => (
                       <button
                         key={s.id}
                         disabled={!s.available}
@@ -207,7 +202,7 @@ export default function FindDoctors() {
                         {s.time}
                       </button>
                     ))}
-                  </div>
+                  </div>}
                 </>
               )}
 

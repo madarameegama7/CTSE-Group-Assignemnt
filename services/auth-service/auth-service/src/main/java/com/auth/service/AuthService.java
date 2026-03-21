@@ -22,21 +22,17 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
-    // ---------------- REGISTER ----------------
     @Transactional
     public AuthResponse register(RegisterRequest request) {
-        // Password policy
         if (!request.getPassword().matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&]).{8,}$")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character");
         }
 
-        // Duplicate email check
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists");
         }
 
-        // Create base user
         User user = new User();
         user.setName(request.getName());
         user.setEmail(request.getEmail());
@@ -48,12 +44,10 @@ public class AuthService {
         userRepository.save(user);
 
 
-        // Generate JWT
         String token = jwtService.generateToken(user.getUserId(), user.getRole().name());
         return new AuthResponse(token, user.getRole().name(), user.getUserId());
     }
 
-    // ---------------- AUTHENTICATE ----------------
     public AuthResponse authenticate(AuthRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Invalid email or password"));

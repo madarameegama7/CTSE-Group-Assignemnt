@@ -4,9 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * Appointment information from Appointment Service
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

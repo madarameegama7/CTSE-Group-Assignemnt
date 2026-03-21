@@ -4,9 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * Response from Auth Service validation endpoint
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

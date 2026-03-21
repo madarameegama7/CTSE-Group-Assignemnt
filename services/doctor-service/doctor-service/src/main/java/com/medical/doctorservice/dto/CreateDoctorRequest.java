@@ -15,7 +15,6 @@ public class CreateDoctorRequest {
     private String phone;
     private String email;
 
-    // explicit getters and setters to avoid Lombok dependency
     public String getName() {
         return name;
     }

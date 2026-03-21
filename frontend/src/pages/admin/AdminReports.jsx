@@ -1,4 +1,5 @@
-import { MONTHLY_DATA, DOCTORS } from '../../utils/mockData';
+import useAppointments from '../../hooks/useAppointments';
+import useDoctors from '../../hooks/useDoctors';
 import {
   AreaChart, Area, LineChart, Line, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
@@ -13,16 +14,29 @@ const DEPT_DATA = [
   { dept: 'Psychiatry',  patients: 143 },
 ];
 
+const MONTHLY_DATA = [
+  { month:'Jan', appointments:312, revenue:46800 },
+  { month:'Feb', appointments:285, revenue:42750 },
+  { month:'Mar', appointments:398, revenue:59700 },
+  { month:'Apr', appointments:356, revenue:53400 },
+  { month:'May', appointments:421, revenue:63150 },
+  { month:'Jun', appointments:389, revenue:58350 },
+  { month:'Jul', appointments:445, revenue:66750 },
+  { month:'Aug', appointments:412, revenue:61800 },
+];
+
 const tooltipStyle = {
   borderRadius: 8, border: '1px solid #E2E8F0',
   fontSize: '0.82rem', boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
 };
 
 export default function AdminReports() {
+  const { appointments } = useAppointments();
+  const { doctors } = useDoctors();
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <div className="grid-2" style={{ gap: 20 }}>
-        {/* Appointments area chart */}
         <div className="card fade-up">
           <div className="card-header">
             <span className="card-title">Appointments Over Time</span>
@@ -47,7 +61,6 @@ export default function AdminReports() {
           </div>
         </div>
 
-        {/* Revenue line chart */}
         <div className="card fade-up">
           <div className="card-header">
             <span className="card-title">Revenue Trend</span>
@@ -71,7 +84,6 @@ export default function AdminReports() {
         </div>
       </div>
 
-      {/* Department breakdown */}
       <div className="card fade-up">
         <div className="card-header">
           <span className="card-title">Patients by Department</span>
@@ -89,7 +101,6 @@ export default function AdminReports() {
         </div>
       </div>
 
-      {/* Top doctors */}
       <div className="card fade-up">
         <div className="card-header">
           <span className="card-title">Top Performing Doctors</span>

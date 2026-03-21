@@ -25,7 +25,7 @@ public class JwtService {
 
         return Jwts.builder()
                 .setSubject(String.valueOf(userId))
-                .claim("userId", userId)  // add userId claim
+                .claim("userId", userId) 
                 .claim("role", role)
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
@@ -37,7 +37,6 @@ public class JwtService {
         return parseClaims(token).getSubject();
     }
 
-    // NEW method to extract userId from token
     public Long extractUserId(String token) {
         Claims claims = parseClaims(token);
         return claims.get("userId", Long.class);

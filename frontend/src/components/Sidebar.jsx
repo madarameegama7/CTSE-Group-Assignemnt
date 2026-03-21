@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/Authcontext';
 import { Activity, LogOut } from 'lucide-react';
 
 export default function Sidebar({ navItems, role }) {

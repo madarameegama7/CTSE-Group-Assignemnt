@@ -1,13 +1,27 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 
 const AuthContext = createContext(null);
 
-
-
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    try {
+      const stored = localStorage.getItem('user');
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  });
+
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError]     = useState(null);
+
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('user');
+    }
+  }, [user]);
 
   const login = useCallback(async (email, password) => {
     setLoading(true); setError(null);
@@ -22,7 +36,6 @@ export function AuthProvider({ children }) {
       try {
         data = await res.json();
       } catch (parseError) {
-        // If the backend is completely down, Vite proxy might return an HTML error page or empty response
         throw new Error('Unable to connect to the backend server. Please ensure the api-gateway and auth-service are running.');
       }
 
@@ -32,12 +45,14 @@ export function AuthProvider({ children }) {
       }
 
       const { token, role, userId } = data;
+
       localStorage.setItem('token', token);
 
       const loggedInUser = { email, role, userId };
       setUser(loggedInUser);
       setLoading(false);
       return loggedInUser;
+
     } catch (err) {
       setError(err.message || 'Something went wrong');
       setLoading(false);
@@ -45,13 +60,41 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
+  const register = useCallback(async (formData) => {
+    setLoading(true); setError(null);
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+
+      let data;
+      try { data = await res.json(); } catch(e) {}
+
+      if (!res.ok) {
+        throw new Error(data?.message || data?.error || `Server error: ${res.status}`);
+      }
+
+      setLoading(false);
+      return data;
+
+    } catch (err) {
+      setError(err.message || 'Registration failed');
+      setLoading(false);
+      throw err;
+    }
+  }, []);
+
   const logout = useCallback(() => {
+
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setUser(null);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, error, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, error, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

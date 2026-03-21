@@ -24,7 +24,6 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final AppointmentServiceClient appointmentClient;
 
-    // Create payment
     public PaymentResponse createPayment(CreatePaymentRequest request, int patientId) {
         AppointmentResponse appointment;
 
@@ -52,7 +51,6 @@ public class PaymentService {
         return mapToResponse(savedPayment);
     }
 
-    // Get payment details by payment ID
     public PaymentResponse getPaymentById(int paymentId) {
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new PaymentNotFoundException("Payment not found with ID: " + paymentId));
@@ -60,7 +58,6 @@ public class PaymentService {
         return mapToResponse(payment);
     }
 
-    // Get payment details by patient ID
     public List<PaymentResponse> getPaymentsByPatientId(int patientId) {
         return paymentRepository.findByPatientId(patientId)
                 .stream()
@@ -68,7 +65,6 @@ public class PaymentService {
                 .toList();
     }
 
-    // Get payment details by appointment ID
     public List<PaymentResponse> getPaymentsByAppointmentId(int appointmentId) {
         return paymentRepository.findByAppointmentId(appointmentId)
                 .stream()
@@ -76,12 +72,10 @@ public class PaymentService {
                 .toList();
     }
 
-    // Update payment details - For patient
     public PaymentResponse updatePayment(int paymentId, UpdatePaymentRequest request) {
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new PaymentNotFoundException("Payment not found with ID: " + paymentId));
 
-        // patient can update only while pending
         if (payment.getPaymentStatus() != PaymentStatus.PENDING) {
             throw new IllegalStateException("Payment details can only be updated while status is PENDING.");
         }
@@ -99,7 +93,6 @@ public class PaymentService {
         return mapToResponse(updatedPayment);
     }
 
-    // Update payment status - For admin
     public PaymentResponse updatePaymentStatus(int paymentId, UpdatePaymentStatusRequest request) {
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new PaymentNotFoundException("Payment not found with ID: " + paymentId));
