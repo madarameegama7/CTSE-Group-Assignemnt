@@ -53,5 +53,11 @@ public class AppointmentService {
         appointment.setStatus(request.getStatus());
         return appointmentRepository.save(appointment);
     }
+
+    // Get appointment details by AppointmentId - Added by Ashika
+    public Appointment getAppointmentById(Long id) {
+        return appointmentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+    }
 }
 
