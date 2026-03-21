@@ -14,9 +14,9 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class PaymentResponse {
-    private UUID paymentId;
-    private UUID appointmentId;
-    private UUID patientId;
+    private int paymentId;
+    private int appointmentId;
+    private int patientId;
     private BigDecimal amount;
     private PaymentMethod paymentMethod;
     private PaymentStatus paymentStatus;
