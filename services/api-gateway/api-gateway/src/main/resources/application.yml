@@ -12,24 +12,32 @@ spring:
           enabled: false
           lower-case-service-id: true
 
-      mvc:
-        routes:
-          - id: auth-service
-            uri: http://localhost:8081
-            predicates:
-              - Path=/api/auth/**
+      routes:
+        - id: auth-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/auth/**
 
-          - id: doctor-service
-            uri: http://localhost:8082
-            predicates:
-              - Path=/api/doctors/**
+        - id: doctor-service
+          uri: http://localhost:8084
+          predicates:
+            - Path=/api/doctors/**
 
-          - id: payment-service
-            uri: http://localhost:8083
-            predicates:
-              - Path=/api/payments/**
+        - id: appointment-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/appointments/**
 
-          - id: appointment-service
-            uri: http://localhost:8084
-            predicates:
-              - Path=/api/appointments/**
+        - id: payment-service
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/payments/**
+
+      globalcors:
+        add-to-simple-url-handler-mapping: true
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+            allowCredentials: false

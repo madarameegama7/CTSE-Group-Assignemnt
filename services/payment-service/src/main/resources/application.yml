@@ -18,9 +18,14 @@ spring:
 server:
   port: 8083
 
-# Feign client target for appointment service
+# Inter-service communication via API Gateway
 appointment:
-  url: http://localhost:8084
+  service:
+    url: http://localhost:8080/api/appointments
+
+# Feign client target for appointment service (alternative to WebClient)
+# appointment:
+#   url: http://localhost:8082
 
 jwt:
   secret: 08788b9566dad0f379f4530d090c9163cc199fdf76eef8443bee827d05bee706fff39966
