@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { DOCTORS, SLOTS } from '../../utils/mockData';
+import { SLOTS } from '../../utils/mockData';
+import useDoctors from '../../hooks/useDoctors';
 import { Search, Star, Filter, X, CalendarDays, Clock, CheckCircle2 } from 'lucide-react';
 
 const SPECIALTIES = ['All','Cardiologist','Neurologist','Orthopedic','Dermatologist','Pediatrician','Psychiatrist'];
@@ -13,7 +14,9 @@ export default function FindDoctors() {
   const [selDate, setSelDate]   = useState('2026-03-25');
   const [apptType, setApptType] = useState('Consultation');
 
-  const docs = DOCTORS.filter(d => {
+  const { doctors: docsData, loading } = useDoctors();
+
+  const docs = docsData.filter(d => {
     const ms = spec === 'All' || d.specialty === spec;
     const mq = d.name.toLowerCase().includes(search.toLowerCase()) || d.specialty.toLowerCase().includes(search.toLowerCase());
     return ms && mq;
@@ -40,7 +43,9 @@ export default function FindDoctors() {
         <button className="btn btn-outline"><Filter size={14} /> Filter</button>
       </div>
 
-      <p style={{ fontSize:'0.8rem', color:'#94A3B8', marginBottom:16 }}>{docs.length} doctors found</p>
+      <p style={{ fontSize:'0.8rem', color:'#94A3B8', marginBottom:16 }}>
+        {loading ? 'Loading doctors...' : `${docs.length} doctors found`}
+      </p>
 
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))', gap:16 }}>
         {docs.map(doc => (
