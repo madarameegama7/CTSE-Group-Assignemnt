@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { APPOINTMENTS, USERS_LIST } from "../../utils/mockData";
-import { Check, X, Eye } from "lucide-react";
+import { Check, X, Eye, DollarSign, CreditCard } from "lucide-react";
 
 const badgeClass = (status) => {
   const colorMap = {
@@ -35,7 +35,6 @@ const SAMPLE_PAYMENTS = [
     status: "PENDING",
     txId: "TXN-20260322-001",
     paidAt: "2026-03-20 14:12",
-    notes: "Annual cardiac screening",
     invoice: "INV-1001",
   },
   {
@@ -50,7 +49,6 @@ const SAMPLE_PAYMENTS = [
     status: "FAILED",
     txId: "TXN-20260323-100",
     paidAt: "2026-03-22 11:02",
-    notes: "Card declined",
     invoice: "INV-1003",
   },
   {
@@ -65,7 +63,6 @@ const SAMPLE_PAYMENTS = [
     status: "PENDING",
     txId: "TXN-20260320-077",
     paidAt: "2026-03-19 16:40",
-    notes: "Routine ECG",
     invoice: "INV-1004",
   },
 ];
@@ -110,6 +107,64 @@ export default function VerifyPayments() {
 
   return (
     <div>
+      {/* Summary tiles */}
+      <div className="stats-grid" style={{ marginBottom: 16 }}>
+        {(() => {
+          const total = payments.length;
+          const pending = payments.filter((p) => p.status === "PENDING").length;
+          const verified = payments.filter(
+            (p) => p.status === "VERIFIED",
+          ).length;
+          const failed = payments.filter((p) => p.status === "FAILED").length;
+          const tiles = [
+            {
+              label: "Total Payments",
+              value: total,
+              icon: DollarSign,
+              color: "#2563EB",
+              bg: "#EFF6FF",
+            },
+            {
+              label: "Pending",
+              value: pending,
+              icon: CreditCard,
+              color: "#F59E0B",
+              bg: "#FFFBEB",
+            },
+            {
+              label: "Verified",
+              value: verified,
+              icon: Check,
+              color: "#16A34A",
+              bg: "#F0FDFA",
+            },
+            {
+              label: "Failed",
+              value: failed,
+              icon: X,
+              color: "#EF4444",
+              bg: "#FEF2F2",
+            },
+          ];
+          return tiles.map((s) => {
+            const Icon = s.icon;
+            return (
+              <div className="stat-tile fade-up" key={s.label}>
+                <div className="stat-tile-top">
+                  <div
+                    className="stat-tile-icon"
+                    style={{ background: s.bg, color: s.color }}
+                  >
+                    <Icon size={18} />
+                  </div>
+                </div>
+                <div className="stat-tile-value">{s.value}</div>
+                <div className="stat-tile-label">{s.label}</div>
+              </div>
+            );
+          });
+        })()}
+      </div>
       <div className="card">
         <div className="card-header">
           <span className="card-title">Verify Payments</span>
@@ -180,10 +235,6 @@ export default function VerifyPayments() {
                             {badgeClass(p.status)}
                           </div>
                         </div>
-                      </div>
-
-                      <div style={{ marginTop: 10, color: "#0F172A" }}>
-                        <strong>Notes:</strong> {p.notes || "—"}
                       </div>
                     </div>
 
