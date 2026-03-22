@@ -73,7 +73,7 @@ export default function MakePayments() {
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
                   <span style={{ fontWeight: 600, color: '#0F172A', fontSize: '1.05rem' }}>{a.doctorName}</span>
-                  <span style={{ fontWeight: 700, color: '#2563EB', fontSize: '1.1rem' }}>${a.fee}</span>
+                  <span style={{ fontWeight: 700, color: '#2563EB', fontSize: '1.1rem' }}>Rs. ${a.fee}</span>
                 </div>
                 <div style={{ color: '#64748B', fontSize: '0.85rem', marginBottom: 12 }}>{a.specialty} • {a.type}</div>
                 <div style={{ display: 'flex', gap: 16, fontSize: '0.8rem', color: '#94A3B8' }}>
@@ -150,7 +150,7 @@ export default function MakePayments() {
              </div>
 
              <button type="submit" className="btn btn-primary" disabled={isProcessing} style={{ width: '100%', justifyContent: 'center', padding: '14px', fontSize: '1rem', fontWeight: 600 }}>
-               {isProcessing ? 'Processing Payment...' : `Confirm Payment of $${selectedAppt.fee}`}
+               {isProcessing ? 'Processing Payment...' : `Confirm Payment of Rs. ${selectedAppt.fee}`}
              </button>
              
              <div style={{ textAlign: 'center', marginTop: 16, fontSize: '0.8rem', color: '#94A3B8' }}>
@@ -181,7 +181,7 @@ export default function MakePayments() {
             </div>
             <h3 style={{ margin: '0 0 12px', fontSize: '1.4rem', color: '#0F172A', fontWeight: 700 }}>Payment Successful!</h3>
             <p style={{ margin: '0 0 24px', color: '#64748B', fontSize: '0.95rem', lineHeight: 1.5 }}>
-              Your payment of <strong style={{ color: '#0F172A' }}>${selectedAppt?.fee}</strong> via {method} has been processed successfully. Your appointment is confirmed.
+              Your payment of <strong style={{ color: '#0F172A' }}>Rs. ${selectedAppt?.fee}</strong> via {method} has been processed successfully. Your appointment is confirmed.
             </p>
             <button 
               className="btn btn-primary" 

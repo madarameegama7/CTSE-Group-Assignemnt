@@ -85,7 +85,7 @@ export default function AdminAppointments() {
                   <td style={{ color: '#64748B' }}>{a.time}</td>
                   <td><span className="badge badge-slate">{a.type}</span></td>
                   <td>{badge(a.status)}</td>
-                  <td style={{ fontWeight: 700, color: '#0F172A' }}>${a.fee}</td>
+                  <td style={{ fontWeight: 700, color: '#0F172A' }}>Rs. ${a.fee}</td>
                 </tr>
               ))}
             </tbody>
