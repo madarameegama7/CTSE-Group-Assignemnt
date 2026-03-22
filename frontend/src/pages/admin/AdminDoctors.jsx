@@ -6,7 +6,7 @@ import { Search, Plus, Star, MoreHorizontal, CheckCircle2, XCircle, X, Clock, Tr
 
 const SPECIALTIES = ['Cardiologist','Neurologist','Orthopedic','Dermatologist','Pediatrician','Psychiatrist'];
 const DEPARTMENTS  = ['Cardiology','Neurology','Orthopedics','Dermatology','Pediatrics','Psychiatry'];
-const EMPTY_FORM   = { name:'', email:'', specialty:'Cardiologist', department:'Cardiology', experience:'', fee:'', available:true };
+const EMPTY_FORM   = { name:'', email:'', password:'', specialty:'Cardiologist', department:'Cardiology', experience:'', fee:'', available:true };
 
 export default function AdminDoctors() {
   const { doctors: doctorsData } = useDoctors();
@@ -44,6 +44,8 @@ export default function AdminDoctors() {
     if (!form.email.trim()) e.email = 'Email is required';
     else if (!/\S+@\S+\.\S+/.test(form.email)) e.email = 'Enter a valid email';
     if (doctors.find(d => d.email === form.email)) e.email = 'Email already exists';
+    if (!form.password.trim()) e.password = 'Password is required';
+    else if (form.password.length < 8) e.password = 'Must be 8+ chars and strong';
     if (!form.experience.trim()) e.experience = 'Experience is required';
     if (!form.fee || isNaN(form.fee) || Number(form.fee) <= 0) e.fee = 'Enter a valid fee';
     return e;
@@ -55,31 +57,54 @@ export default function AdminDoctors() {
     if (Object.keys(e2).length) { setErrors(e2); return; }
     setSaving(true);
     try {
+      // 1. Create the Authentication Account so the Doctor can log in
+      const authPayload = {
+        name: form.name.trim(),
+        email: form.email.trim(),
+        password: form.password,
+        role: 'DOCTOR',
+        address: form.department,
+        phone: ''
+      };
+      await api.post('/auth/register', authPayload);
+
+      // 2. Create the Doctor Profile in the Doctor microservice
       const initials = form.name.split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+      
+      const payload = {
+        name: form.name.trim(),
+        specialization: form.specialty,
+        hospital: form.department,
+        email: form.email.trim(),
+        phone: ''
+      };
+      
+      const res = await api.post('/doctors', payload);
+
       const newDoc = {
-        id:         'd' + Date.now(),
-        name:       form.name.trim(),
-        email:      form.email.trim(),
-        specialty:  form.specialty,
-      department: form.department,
-      experience: form.experience.trim(),
-      fee:        Number(form.fee),
-      available:  form.available,
-      rating:     0,
-      reviews:    0,
-      avatar:     initials,
-      nextSlot:   'Not set',
-    };
-    setDoctors(prev => [newDoc, ...prev]);
-    setSaving(false);
-    setShowModal(false);
-    setForm(EMPTY_FORM);
-    setErrors({});
-    setSuccessMsg(`Dr. ${newDoc.name} added successfully!`);
-    setTimeout(() => setSuccessMsg(''), 3000);
+        id:         res.doctorId?.toString() || 'd'+Date.now(),
+        name:       res.name,
+        email:      res.email,
+        specialty:  res.specialization,
+        department: res.hospital,
+        experience: form.experience.trim(),
+        fee:        Number(form.fee),
+        available:  form.available,
+        rating:     0,
+        reviews:    0,
+        avatar:     initials,
+        nextSlot:   'Not set',
+      };
+      
+      setDoctors(prev => [newDoc, ...prev]);
+      setShowModal(false);
+      setForm(EMPTY_FORM);
+      setErrors({});
+      setSuccessMsg(`Dr. ${newDoc.name} added successfully as a System User and Doctor!`);
+      setTimeout(() => setSuccessMsg(''), 3000);
     } catch (error) {
       console.error('Error adding doctor:', error);
-      setErrors({ submit: 'Failed to add doctor' });
+      setErrors({ submit: error.message || 'Failed to add doctor to both systems' });
     } finally {
       setSaving(false);
     }
@@ -202,7 +227,7 @@ export default function AdminDoctors() {
                       : <span style={{ color: '#CBD5E1', fontSize: '0.78rem' }}>No ratings yet</span>
                     }
                   </td>
-                  <td style={{ fontWeight: 700, color: '#0F172A' }}>${doc.fee}</td>
+                  <td style={{ fontWeight: 700, color: '#0F172A' }}>Rs. ${doc.fee}</td>
                   <td>
                     {doc.available
                       ? <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.78rem', color: '#16A34A', fontWeight: 600 }}>
@@ -260,6 +285,18 @@ export default function AdminDoctors() {
                     />
                     {errors.email && <span style={errText}>{errors.email}</span>}
                   </div>
+                </div>
+
+                <div className="form-group" style={{ marginBottom: 0, marginTop: 8, paddingBottom: 8 }}>
+                  <label className="form-label">Temporary Account Password *</label>
+                  <input
+                    className="form-input"
+                    type="password"
+                    placeholder="Must be 8+ chars (e.g. Doctor@1234)"
+                    value={form.password}
+                    onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
+                  />
+                  {errors.password && <span style={errText}>{errors.password}</span>}
                 </div>
 
                 <div className="grid-2" style={{ gap: 12 }}>
@@ -326,9 +363,12 @@ export default function AdminDoctors() {
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-outline" onClick={closeModal}>Cancel</button>
-                <button type="submit" className="btn btn-primary" disabled={saving}>
-                  {saving ? <span className="spinner" /> : <><Plus size={14} /> Add Doctor</>}
-                </button>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '5px' }}>
+                  <button type="submit" className="btn btn-primary" disabled={saving}>
+                    {saving ? <span className="spinner" /> : <><Plus size={14} /> Add Doctor</>}
+                  </button>
+                  {errors.submit && <span style={errText}>{errors.submit}</span>}
+                </div>
               </div>
             </form>
           </div>

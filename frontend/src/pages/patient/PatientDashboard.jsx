@@ -140,7 +140,7 @@ export default function PatientDashboard() {
                   <span style={{ fontSize: '0.75rem', color: '#F59E0B', display: 'flex', alignItems: 'center', gap: 3, fontWeight: 600 }}>
                     <Star size={12} fill="#F59E0B" /> {doc.rating}
                   </span>
-                  <span style={{ fontSize: '0.72rem', color: '#64748B' }}>${doc.fee} / visit</span>
+                  <span style={{ fontSize: '0.72rem', color: '#64748B' }}>Rs. ${doc.fee} / visit</span>
                 </div>
                 <button className="btn btn-primary btn-sm w-full" onClick={() => navigate('/patient/find-doctors')}>Book</button>
               </div>

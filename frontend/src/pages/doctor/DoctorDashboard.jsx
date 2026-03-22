@@ -131,7 +131,7 @@ export default function DoctorDashboard() {
                   <td>{a.time}</td>
                   <td><span className="badge badge-slate">{a.type}</span></td>
                   <td>{badge(a.status)}</td>
-                  <td style={{ fontWeight:600 }}>${a.fee}</td>
+                  <td style={{ fontWeight:600 }}>Rs. ${a.fee}</td>
                   <td><button className="btn btn-ghost btn-sm">View <ArrowRight size={12} /></button></td>
                 </tr>
               ))}

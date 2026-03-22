@@ -3,10 +3,10 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/Authcontext';
 import { Activity, Eye, EyeOff, Heart, Stethoscope, Shield } from 'lucide-react';
 
-const DEMO_ACCOUNTS = [
-  { role:'PATIENT', email:'patient@demo.com', icon:Heart,       color:'#2563EB', label:'Patient',  desc:'Book & manage appointments' },
-  { role:'DOCTOR',  email:'doctor@demo.com',  icon:Stethoscope, color:'#0D9488', label:'Doctor',   desc:'Manage schedule & patients'  },
-  { role:'ADMIN',   email:'admin@demo.com',   icon:Shield,      color:'#7C3AED', label:'Admin',    desc:'System & user management'    },
+const ACCOUNT_TYPES = [
+  { role:'PATIENT', icon:Heart,       color:'#2563EB', label:'Patient',  desc:'Book & manage appointments' },
+  { role:'DOCTOR',  icon:Stethoscope, color:'#0D9488', label:'Doctor',   desc:'Manage schedule & patients'  },
+  { role:'ADMIN',   icon:Shield,      color:'#7C3AED', label:'Admin',    desc:'System & user management'    },
 ];
 
 const REDIRECT = { PATIENT:'/patient/dashboard', DOCTOR:'/doctor/dashboard', ADMIN:'/admin/dashboard' };
@@ -19,7 +19,7 @@ export default function Login() {
   const { login, loading, error } = useAuth();
   const navigate = useNavigate();
 
-  const pick = (acc) => { setSelected(acc); setEmail(acc.email); setPassword('demo123'); };
+  const pick = (acc) => { setSelected(acc); };
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -64,7 +64,7 @@ export default function Login() {
           </div>
 
           <div style={styles.tileRow}>
-            {DEMO_ACCOUNTS.map(acc => {
+            {ACCOUNT_TYPES.map(acc => {
               const Icon = acc.icon;
               const active = selected?.role === acc.role;
               return (
@@ -133,10 +133,7 @@ export default function Login() {
               }
             </button>
 
-            <p style={styles.demoHint}>
-              <strong>Demo credentials:</strong> {selected ? selected.email : 'select a role above'} / demo123
-            </p>
-            
+
             <p style={styles.demoHint}>
               Don't have an account? <Link to="/register" style={{ color: '#2563EB', fontWeight: 600, textDecoration: 'none' }}>Sign up</Link>
             </p>

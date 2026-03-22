@@ -37,7 +37,7 @@ export default function AdminDashboard() {
     { label:'Total Patients', value:'2,847', change:'+15.2%', icon:Users,       color:'#2563EB', bg:'#EFF6FF' },
     { label:'Active Doctors', value:doctors.length,     change:'+2',     icon:UserCheck,  color:'#0D9488', bg:'#F0FDFA' },
     { label:'Appointments',   value:appointments.length, change:'+8.7%',  icon:CalendarDays,color:'#7C3AED', bg:'#F5F3FF' },
-    { label:'Revenue (Mo.)',  value:`$${(totalRevenue*12).toLocaleString()}`, change:'+12.4%', icon:DollarSign, color:'#D97706', bg:'#FFFBEB' },
+    { label:'Revenue (Mo.)',  value:`Rs. ${(totalRevenue*12).toLocaleString()}`, change:'+12.4%', icon:DollarSign, color:'#D97706', bg:'#FFFBEB' },
   ];
 
   return (
@@ -104,8 +104,8 @@ export default function AdminDashboard() {
             <LineChart data={MONTHLY_DATA}>
               <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
               <XAxis dataKey="month" tick={{ fontSize:11, fill:'#94A3B8' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize:11, fill:'#94A3B8' }} axisLine={false} tickLine={false} tickFormatter={v=>`$${(v/1000).toFixed(0)}k`} />
-              <Tooltip contentStyle={{ borderRadius:8, border:'1px solid #E2E8F0', fontSize:'0.82rem' }} formatter={v=>[`$${v.toLocaleString()}`,'Revenue']} />
+              <YAxis tick={{ fontSize:11, fill:'#94A3B8' }} axisLine={false} tickLine={false} tickFormatter={v=>`Rs. ${(v/1000).toFixed(0)}k`} />
+              <Tooltip contentStyle={{ borderRadius:8, border:'1px solid #E2E8F0', fontSize:'0.82rem' }} formatter={v=>[`Rs. ${v.toLocaleString()}`,'Revenue']} />
               <Line type="monotone" dataKey="revenue" stroke="#7C3AED" strokeWidth={2.5} dot={{ fill:'#7C3AED', strokeWidth:2, r:4 }} activeDot={{ r:6 }} />
             </LineChart>
           </ResponsiveContainer>
@@ -127,7 +127,7 @@ export default function AdminDashboard() {
                   <td style={{ color:'#64748B' }}>{a.date}</td>
                   <td><span className="badge badge-slate">{a.type}</span></td>
                   <td>{badge(a.status)}</td>
-                  <td style={{ fontWeight:700 }}>${a.fee}</td>
+                  <td style={{ fontWeight:700 }}>Rs. ${a.fee}</td>
                 </tr>
               ))}
             </tbody>
