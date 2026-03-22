@@ -76,6 +76,23 @@ export default function AdminUsers() {
         status: form.status,
         joined: new Date().toISOString().slice(0, 10),
       };
+      // If the admin is creating a DOCTOR from the general User Tab, 
+      // automatically provision a default Medical Profile in the Doctor microservice!
+      if (form.role === 'DOCTOR') {
+        try {
+          const docPayload = {
+            name: form.name.trim(),
+            specialization: 'General',
+            hospital: 'System Default',
+            email: form.email.trim(),
+            phone: ''
+          };
+          await api.post('/doctors', docPayload);
+        } catch (doctorErr) {
+          console.error("Warning: Could not provision default doctor profile", doctorErr);
+        }
+      }
+
       setUsers(prev => [newUser, ...prev]);
       setShowModal(false);
       setForm(EMPTY_FORM);
