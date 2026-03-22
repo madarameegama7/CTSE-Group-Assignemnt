@@ -26,7 +26,7 @@ export function AuthProvider({ children }) {
   const login = useCallback(async (email, password) => {
     setLoading(true); setError(null);
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch('http://localhost:8080/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
@@ -63,7 +63,7 @@ export function AuthProvider({ children }) {
   const register = useCallback(async (formData) => {
     setLoading(true); setError(null);
     try {
-      const res = await fetch('/api/auth/register', {
+      const res = await fetch('http://localhost:8080/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)

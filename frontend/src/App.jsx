@@ -60,7 +60,6 @@ function App() {
             <Route path="appointments" element={<PatientAppointments />} />
             <Route path="find-doctors" element={<FindDoctors />} />
             <Route path="records" element={<MedicalRecords />} />
-            <Route path="make-payments" element={<MakePayments />} />
           </Route>
 
           <Route
