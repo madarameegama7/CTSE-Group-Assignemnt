@@ -58,6 +58,13 @@ public class PaymentService {
         return mapToResponse(payment);
     }
 
+    public List<PaymentResponse> getAllPayments() {
+        return paymentRepository.findAll()
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
     public List<PaymentResponse> getPaymentsByPatientId(int patientId) {
         return paymentRepository.findByPatientId(patientId)
                 .stream()

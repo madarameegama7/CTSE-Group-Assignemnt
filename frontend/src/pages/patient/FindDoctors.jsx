@@ -79,12 +79,6 @@ export default function FindDoctors() {
             time: selSlot.time + ":00"
         });
         
-        await api.post('/payments', {
-            appointmentId: apptData.id || apptData.appointmentId,
-            amount: parseFloat(booking.fee),
-            paymentMethod: "CARD"
-        });
-        
         setStep(3);
       } catch (err) {
         setErrorMsg(err.message);
@@ -238,7 +232,7 @@ export default function FindDoctors() {
                   {step===1 ? 'Cancel' : 'Back'}
                 </button>
                 <button className="btn btn-primary" onClick={handleBook} disabled={(step===1&&!selSlot) || isProcessing}>
-                  {isProcessing ? 'Processing...' : (step===1 ? 'Continue' : 'Confirm & Pay')}
+                  {isProcessing ? 'Processing...' : (step===1 ? 'Continue' : 'Confirm Booking')}
                 </button>
               </div>
             )}

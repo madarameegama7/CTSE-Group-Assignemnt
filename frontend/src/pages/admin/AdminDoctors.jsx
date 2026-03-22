@@ -56,22 +56,34 @@ export default function AdminDoctors() {
     setSaving(true);
     try {
       const initials = form.name.split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+      
+      const payload = {
+        name: form.name.trim(),
+        specialization: form.specialty,
+        hospital: form.department,
+        email: form.email.trim(),
+        phone: ''
+      };
+      
+      const res = await api.post('/doctors', payload);
+
       const newDoc = {
-        id:         'd' + Date.now(),
-        name:       form.name.trim(),
-        email:      form.email.trim(),
-        specialty:  form.specialty,
-      department: form.department,
-      experience: form.experience.trim(),
-      fee:        Number(form.fee),
-      available:  form.available,
-      rating:     0,
-      reviews:    0,
-      avatar:     initials,
-      nextSlot:   'Not set',
-    };
-    setDoctors(prev => [newDoc, ...prev]);
-    setSaving(false);
+        id:         res.doctorId.toString(),
+        name:       res.name,
+        email:      res.email,
+        specialty:  res.specialization,
+        department: res.hospital,
+        experience: form.experience.trim(),
+        fee:        Number(form.fee),
+        available:  form.available,
+        rating:     0,
+        reviews:    0,
+        avatar:     initials,
+        nextSlot:   'Not set',
+      };
+      
+      setDoctors(prev => [newDoc, ...prev]);
+      setSaving(false);
     setShowModal(false);
     setForm(EMPTY_FORM);
     setErrors({});
@@ -79,7 +91,7 @@ export default function AdminDoctors() {
     setTimeout(() => setSuccessMsg(''), 3000);
     } catch (error) {
       console.error('Error adding doctor:', error);
-      setErrors({ submit: 'Failed to add doctor' });
+      setErrors({ submit: error.message || 'Failed to add doctor' });
     } finally {
       setSaving(false);
     }
@@ -326,9 +338,12 @@ export default function AdminDoctors() {
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-outline" onClick={closeModal}>Cancel</button>
-                <button type="submit" className="btn btn-primary" disabled={saving}>
-                  {saving ? <span className="spinner" /> : <><Plus size={14} /> Add Doctor</>}
-                </button>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '5px' }}>
+                  <button type="submit" className="btn btn-primary" disabled={saving}>
+                    {saving ? <span className="spinner" /> : <><Plus size={14} /> Add Doctor</>}
+                  </button>
+                  {errors.submit && <span style={errText}>{errors.submit}</span>}
+                </div>
               </div>
             </form>
           </div>
