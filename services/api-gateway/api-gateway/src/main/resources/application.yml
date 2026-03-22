@@ -16,24 +16,26 @@ spring:
 
           routes:
             - id: auth-service
-              uri: http://localhost:8081
+              uri: http://auth-service:8080
               predicates:
                 - Path=/api/auth/**
 
             - id: doctor-service
-              uri: http://localhost:8084
+              uri: http://doctor-service:8080
               predicates:
                 - Path=/api/doctors/**
 
             - id: appointment-service
-              uri: http://localhost:8082
+              uri: http://appoinment:8080
               predicates:
                 - Path=/api/appointments/**
 
             - id: payment-service
-              uri: http://localhost:8083
+              uri: http://payment-service:8080
               predicates:
                 - Path=/api/payments/**
+
+
 
           globalcors:
             add-to-simple-url-handler-mapping: true

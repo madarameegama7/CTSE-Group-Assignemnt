@@ -53,15 +53,17 @@ public class AuthService {
     }
 
     public AuthResponse authenticate(AuthRequest request) {
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Invalid email or password"));
 
-        boolean match = passwordEncoder.matches(request.getPassword(), user.getPasswordHash());
-        if (!match) {
-            throw new RuntimeException("Invalid email or password");
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password"));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
         }
 
         String token = jwtService.generateToken(user.getUserId(), user.getRole().name());
+
         return new AuthResponse(token, user.getRole().name(), user.getUserId());
     }
 }

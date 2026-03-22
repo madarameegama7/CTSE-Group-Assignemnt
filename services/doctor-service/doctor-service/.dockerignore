@@ -1,0 +1,15 @@
+target/
+*.log
+*.tmp
+*.class
+.git
+.gitignore
+.idea
+.vscode
+.DS_Store
+mvnw.cmd
+**/target/
+**/*.iml
+# local maven repository (if mounted during development)
+.m2/
+
