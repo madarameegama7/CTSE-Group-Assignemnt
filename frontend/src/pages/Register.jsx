@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/Authcontext';
-import { Activity, Shield, Heart, Stethoscope } from 'lucide-react';
+import { Activity, Shield, Heart, Stethoscope, Eye, EyeOff } from 'lucide-react';
 
 export default function Register() {
   const [formData, setFormData] = useState({
     name: '', email: '', password: '', phone: '', address: '', role: 'PATIENT'
   });
+  const [showPw, setShowPw] = useState(false);
   const { register, loading, error } = useAuth();
   const navigate = useNavigate();
 
@@ -80,7 +81,20 @@ export default function Register() {
 
             <div style={styles.fieldGroup}>
               <label style={styles.label}>Password</label>
-              <input style={styles.input} type="password" name="password" value={formData.password} onChange={handleChange} placeholder="Must be at least 8 characters" required />
+              <div style={styles.pwWrap}>
+                <input
+                  style={{ ...styles.input, paddingRight:'44px' }}
+                  type={showPw ? 'text' : 'password'}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Must be at least 8 characters"
+                  required
+                />
+                <button type="button" style={styles.eyeBtn} onClick={() => setShowPw(p => !p)}>
+                  {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
+                </button>
+              </div>
             </div>
 
             {error && (
@@ -144,6 +158,9 @@ const styles = {
     transition:'border-color 0.18s, box-shadow 0.18s', fontFamily:'inherit',
     boxSizing:'border-box',
   },
+
+  pwWrap: { position:'relative' },
+  eyeBtn: { position:'absolute', right:12, top:'50%', transform:'translateY(-50%)', background:'none', border:'none', cursor:'pointer', color:'#94A3B8', display:'flex', alignItems:'center' },
 
   errorBox: { background:'#FEF2F2', border:'1px solid #FECACA', color:'#B91C1C', borderRadius:8, padding:'9px 13px', fontSize:'0.82rem' },
 
