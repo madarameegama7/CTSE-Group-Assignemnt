@@ -14,7 +14,8 @@ public class WebClientConfig {
     @Bean
     public WebClient webClient(WebClient.Builder builder) {
         return builder
-                .baseUrl("http://localhost:8080/api")
+                // use Docker service name so payment-service can reach appointment-service inside the compose network
+                .baseUrl("http://appoinment:8080/api")
                 .defaultHeader("Content-Type", "application/json")
                 .defaultHeader("Accept", "application/json")
                 .build();

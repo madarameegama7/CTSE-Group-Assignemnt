@@ -3,8 +3,6 @@ package com.auth.controller;
 import com.auth.dto.AuthRequest;
 import com.auth.dto.AuthResponse;
 import com.auth.dto.RegisterRequest;
-import com.auth.dto.UserProfileUpdateRequest;
-import org.springframework.http.HttpHeaders;
 import com.auth.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
