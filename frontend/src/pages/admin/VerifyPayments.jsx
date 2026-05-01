@@ -35,6 +35,17 @@ export default function VerifyPayments() {
   const [pendingAction, setPendingAction] = useState(null);
   const { users } = useAllUsers();
 
+  const formatDate = (isoString) => {
+    if (!isoString) return "--";
+    // accept either ISO or already-formatted date
+    const d = new Date(isoString);
+    if (Number.isNaN(d.getTime())) return isoString;
+    const dd = String(d.getDate()).padStart(2, "0");
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const yyyy = d.getFullYear();
+    return `${dd}/${mm}/${yyyy}`;
+  };
+
   useEffect(() => {
     const fetchAllPayments = async () => {
       try {
@@ -141,58 +152,20 @@ export default function VerifyPayments() {
       <div className="stats-grid" style={{ marginBottom: 24 }}>
         {(() => {
           const total = payments.length;
-          const pending = payments.filter((p) => p.status === "PENDING").length;
-          const verified = payments.filter(
-            (p) => p.status === "VERIFIED",
-          ).length;
-          const failed = payments.filter((p) => p.status === "FAILED").length;
-          const tiles = [
-            {
-              label: "Total Payments",
-              value: total,
-              icon: DollarSign,
-              color: "#2563EB",
-              bg: "#EFF6FF",
-            },
-            {
-              label: "Pending",
-              value: pending,
-              icon: CreditCard,
-              color: "#F59E0B",
-              bg: "#FFFBEB",
-            },
-            {
-              label: "Verified",
-              value: verified,
-              icon: Check,
-              color: "#16A34A",
-              bg: "#F0FDFA",
-            },
-            {
-              label: "Failed",
-              value: failed,
-              icon: X,
-              color: "#EF4444",
-              bg: "#FEF2F2",
-            },
-          ];
-          return tiles.map((s) => {
-            const Icon = s.icon;
-            return (
-              <div className="stat-tile fade-up" key={s.label}>
-                <div className="stat-tile-top">
-                  <div
-                    className="stat-tile-icon"
-                    style={{ background: s.bg, color: s.color }}
-                  >
-                    <Icon size={18} />
-                  </div>
+          return (
+            <div className="stat-tile fade-up">
+              <div className="stat-tile-top">
+                <div
+                  className="stat-tile-icon"
+                  style={{ background: "#EFF6FF", color: "#2563EB" }}
+                >
+                  <DollarSign size={18} />
                 </div>
-                <div className="stat-tile-value">{s.value}</div>
-                <div className="stat-tile-label">{s.label}</div>
               </div>
-            );
-          });
+              <div className="stat-tile-value">{total}</div>
+              <div className="stat-tile-label">Total Payments</div>
+            </div>
+          );
         })()}
       </div>
       <div className="card fade-up">
@@ -227,10 +200,8 @@ export default function VerifyPayments() {
               <tr>
                 <th>Transaction ID</th>
                 <th>Patient</th>
-                <th>Appointment Details</th>
-                <th>Date & Time</th>
+                <th>Date</th>
                 <th>Amount</th>
-                <th>Status</th>
                 <th style={{ textAlign: "right" }}>Actions</th>
               </tr>
             </thead>
@@ -254,60 +225,24 @@ export default function VerifyPayments() {
                         {p.patientName}
                       </td>
                       <td style={{ color: "#64748B" }}>
-                        {appt.type || "Appointment"}
-                        {appt.doctorName ? ` • ${appt.doctorName}` : ""}
-                      </td>
-                      <td style={{ color: "#64748B" }}>
-                        {appt.date
-                          ? `${appt.date} • ${appt.time}`
-                          : p.paymentDate}
+                        {formatDate(appt.date || p.paymentDate)}
                       </td>
                       <td style={{ fontWeight: 700, color: "#0F172A" }}>
                         Rs. ${p.amount}
                       </td>
-                      <td>{badgeClass(p.status)}</td>
                       <td style={{ textAlign: "right" }}>
-                        <div
-                          style={{
-                            display: "flex",
-                            gap: 6,
-                            justifyContent: "flex-end",
-                          }}
+                        <button
+                          className="btn btn-ghost btn-sm"
+                          onClick={() =>
+                            setExpanded((current) =>
+                              current === p.id ? null : p.id,
+                            )
+                          }
+                          title="Details"
+                          style={{ padding: "6px" }}
                         >
-                          <button
-                            className="btn btn-success btn-sm"
-                            onClick={() => openConfirm(p.id, "verify")}
-                            disabled={
-                              p.status === "VERIFIED" ||
-                              p.status === "COMPLETED"
-                            }
-                            title="Verify"
-                            style={{ padding: "6px" }}
-                          >
-                            <Check size={14} />
-                          </button>
-                          <button
-                            className="btn btn-danger btn-sm"
-                            onClick={() => openConfirm(p.id, "reject")}
-                            disabled={p.status === "FAILED"}
-                            title="Reject"
-                            style={{ padding: "6px" }}
-                          >
-                            <X size={14} />
-                          </button>
-                          <button
-                            className="btn btn-ghost btn-sm"
-                            onClick={() =>
-                              setExpanded((current) =>
-                                current === p.id ? null : p.id,
-                              )
-                            }
-                            title="Details"
-                            style={{ padding: "6px" }}
-                          >
-                            <Eye size={14} />
-                          </button>
-                        </div>
+                          <Eye size={14} />
+                        </button>
                       </td>
                     </tr>
                     {expanded === p.id && (
