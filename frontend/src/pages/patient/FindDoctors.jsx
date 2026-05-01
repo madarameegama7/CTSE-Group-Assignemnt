@@ -41,7 +41,7 @@ export default function FindDoctors() {
         if (!exists) {
           combined.push({
             id: 'usr_' + userDoc.id,
-            name: userDoc.name,
+            name: userDoc.name || 'Unknown Doctor',
             email: userDoc.email || 'N/A',
             specialty: 'General',
             department: 'General',
@@ -50,7 +50,7 @@ export default function FindDoctors() {
             available: true,
             rating: 0,
             reviews: 0,
-            avatar: userDoc.name.split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase(),
+            avatar: (userDoc.name || 'Unknown Doctor').split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase(),
             nextSlot: 'Not set'
           });
         }
