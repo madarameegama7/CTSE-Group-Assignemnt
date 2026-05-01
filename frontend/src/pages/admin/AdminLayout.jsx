@@ -22,27 +22,18 @@ const NAV = [
 ];
 
 const PAGE_TITLES = {
-  "/admin/dashboard": { title: "Admin Dashboard", sub: "System overview" },
-  "/admin/users": { title: "User Management", sub: "Manage all users" },
-  "/admin/doctors": {
-    title: "Doctor Management",
-    sub: "Manage doctors & departments",
-  },
-  "/admin/appointments": {
-    title: "All Appointments",
-    sub: "Platform-wide appointment log",
-  },
-  "/admin/reports": { title: "Reports", sub: "Analytics & insights" },
-  "/admin/verify-payments": {
-    title: "Verify Payments",
-    sub: "Review incoming payments",
-  },
+  "/admin/dashboard": { title: "Admin Dashboard" },
+  "/admin/users": { title: "User Management" },
+  "/admin/doctors": { title: "Doctor Management" },
+  "/admin/appointments": { title: "All Appointments" },
+  "/admin/reports": { title: "Reports" },
+  "/admin/verify-payments": { title: "Verify Payments" },
 };
 
 export default function AdminLayout() {
   const [open, setOpen] = useState(false);
   const pathname = window.location.pathname;
-  const meta = PAGE_TITLES[pathname] || { title: "Admin", sub: "" };
+  const meta = PAGE_TITLES[pathname] || { title: "Admin" };
 
   return (
     <div className="shell">
@@ -76,7 +67,6 @@ export default function AdminLayout() {
             </button>
             <div>
               <div className="topbar-title">{meta.title}</div>
-              {meta.sub && <div className="topbar-sub">{meta.sub}</div>}
             </div>
           </div>
           <div className="topbar-right">
