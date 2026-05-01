@@ -21,7 +21,7 @@ export default function useDoctors() {
           rating: 4.8, 
           reviews: 120, 
           fee: d.fee || 150, 
-          avatar: d.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(),
+          avatar: String(d.name || 'UD').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(),
           available: true,
           nextSlot: 'View Calendar' 
         }));

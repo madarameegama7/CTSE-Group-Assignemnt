@@ -14,17 +14,17 @@ const NAV = [
 ];
 
 const PAGE_TITLES = {
-  '/doctor/dashboard':    { title:'Dashboard',     sub:"Today's overview" },
-  '/doctor/appointments': { title:'Appointments',  sub:'Manage patient bookings' },
-  '/doctor/patients':     { title:'My Patients',   sub:'Patient directory' },
-  '/doctor/schedule':     { title:'My Schedule',   sub:'Manage availability' },
-  '/doctor/profile':      { title:'Profile',       sub:'Manage your information' },
+  '/doctor/dashboard':    { title:'Dashboard' },
+  '/doctor/appointments': { title:'Appointments' },
+  '/doctor/patients':     { title:'My Patients' },
+  '/doctor/schedule':     { title:'My Schedule' },
+  '/doctor/profile':      { title:'Profile' },
 };
 
 export default function DoctorLayout() {
   const [open, setOpen] = useState(false);
   const pathname = window.location.pathname;
-  const meta = PAGE_TITLES[pathname] || { title:'MediBook', sub:'' };
+  const meta = PAGE_TITLES[pathname] || { title:'MediBook' };
 
   return (
     <div className="shell">
@@ -40,7 +40,6 @@ export default function DoctorLayout() {
             </button>
             <div>
               <div className="topbar-title">{meta.title}</div>
-              {meta.sub && <div className="topbar-sub">{meta.sub}</div>}
             </div>
           </div>
           <div className="topbar-right">
