@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import useDoctors from '../../hooks/useDoctors';
+import useAllUsers from '../../hooks/useAllUsers';
 import { useAuth } from '../../context/Authcontext';
 import { api } from '../../services/api';
 import { Search, Star, Filter, X, CalendarDays, Clock, CheckCircle2 } from 'lucide-react';
@@ -26,8 +27,39 @@ export default function FindDoctors() {
   const [slotsLoading, setSlotsLoading] = useState(false);
 
   const { doctors: docsData, loading } = useDoctors();
+  const { users: usersData } = useAllUsers();
+  const [doctors, setDoctors] = useState([]);
 
-  const docs = docsData.filter(d => {
+  useEffect(() => {
+    const combined = [...docsData];
+    if (usersData && usersData.length > 0) {
+      usersData.filter(u => u.role === 'DOCTOR').forEach(userDoc => {
+        const exists = combined.find(d => 
+          (d.email && d.email !== 'N/A' && userDoc.email && userDoc.email !== 'N/A' && d.email.toLowerCase() === userDoc.email.toLowerCase()) || 
+          d.name.toLowerCase() === userDoc.name.toLowerCase()
+        );
+        if (!exists) {
+          combined.push({
+            id: 'usr_' + userDoc.id,
+            name: userDoc.name,
+            email: userDoc.email || 'N/A',
+            specialty: 'General',
+            department: 'General',
+            experience: 'Unknown',
+            fee: 150,
+            available: true,
+            rating: 0,
+            reviews: 0,
+            avatar: userDoc.name.split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase(),
+            nextSlot: 'Not set'
+          });
+        }
+      });
+    }
+    setDoctors(combined);
+  }, [docsData, usersData]);
+
+  const docs = doctors.filter(d => {
     const ms = spec === 'All' || d.specialty === spec;
     const mq = d.name.toLowerCase().includes(search.toLowerCase()) || d.specialty.toLowerCase().includes(search.toLowerCase());
     return ms && mq;

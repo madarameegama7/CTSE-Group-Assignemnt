@@ -10,12 +10,14 @@ import PatientAppointments from "./pages/patient/PatientAppointments";
 import FindDoctors from "./pages/patient/FindDoctors";
 import MedicalRecords from "./pages/patient/MedicalRecords";
 import MakePayments from "./pages/patient/MakePayments";
+import PatientProfile from "./pages/patient/PatientProfile";
 
 import DoctorLayout from "./pages/doctor/DoctorLayout";
 import DoctorDashboard from "./pages/doctor/DoctorDashboard";
 import DoctorAppointments from "./pages/doctor/DoctorAppointments";
 import DoctorPatients from "./pages/doctor/DoctorPatients";
 import DoctorSchedule from "./pages/doctor/DoctorSchedule";
+import DoctorProfile from "./pages/doctor/DoctorProfile";
 
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -60,6 +62,8 @@ function App() {
             <Route path="appointments" element={<PatientAppointments />} />
             <Route path="find-doctors" element={<FindDoctors />} />
             <Route path="records" element={<MedicalRecords />} />
+            <Route path="payments" element={<MakePayments />} />
+            <Route path="profile" element={<PatientProfile />} />
           </Route>
 
           <Route
@@ -75,6 +79,7 @@ function App() {
             <Route path="appointments" element={<DoctorAppointments />} />
             <Route path="patients" element={<DoctorPatients />} />
             <Route path="schedule" element={<DoctorSchedule />} />
+            <Route path="profile" element={<DoctorProfile />} />
           </Route>
 
           <Route
