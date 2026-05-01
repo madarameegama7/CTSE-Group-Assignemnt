@@ -26,6 +26,7 @@ public class DoctorService {
         doctor.setHospital(req.getHospital());
         doctor.setPhone(req.getPhone());
         doctor.setEmail(req.getEmail());
+        doctor.setFee(req.getFee());
 
         Doctor saved = doctorRepository.save(doctor);
 
@@ -36,6 +37,7 @@ public class DoctorService {
         resp.setHospital(saved.getHospital());
         resp.setPhone(saved.getPhone());
         resp.setEmail(saved.getEmail());
+        resp.setFee(saved.getFee());
         return resp;
     }
 
@@ -49,6 +51,7 @@ public class DoctorService {
                     r.setHospital(d.getHospital());
                     r.setPhone(d.getPhone());
                     r.setEmail(d.getEmail());
+                    r.setFee(d.getFee());
                     return r;
                 })
                 .toList();
