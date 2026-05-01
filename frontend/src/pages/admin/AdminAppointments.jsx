@@ -85,7 +85,7 @@ export default function AdminAppointments() {
                   <td style={{ color: '#64748B' }}>{a.time}</td>
                   <td><span className="badge badge-slate">{a.type}</span></td>
                   <td>{badge(a.status)}</td>
-                  <td style={{ fontWeight: 700, color: '#0F172A' }}>Rs. ${a.fee}</td>
+                  <td style={{ fontWeight: 700, color: '#0F172A' }}>Rs. {a.fee}</td>
                 </tr>
               ))}
             </tbody>
@@ -94,7 +94,7 @@ export default function AdminAppointments() {
 
         <div style={{ padding: '12px 20px', borderTop: '1px solid #F1F5F9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ fontSize: '0.78rem', color: '#94A3B8' }}>Showing {filtered.length} appointments</span>
-          <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0F172A' }}>Total: ${totalRevenue.toLocaleString()}</span>
+          <span style={{ fontSize: '0.84rem', fontWeight: 700, color: '#0F172A' }}>Total: Rs. {totalRevenue.toLocaleString()}</span>
         </div>
       </div>
     </div>
