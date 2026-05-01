@@ -21,10 +21,10 @@ export default function useAppointments() {
           return {
             id: a.appointmentId || a.id,
             patientId: a.patientId,
-            patientName: a.patientName || (user ? user.name : 'Unknown Patient'),
+            patientName: (user ? user.name : (a.patientName || 'Unknown Patient')),
           doctorId: a.doctorId,
-          doctorName: a.doctorName || (doctor ? doctor.name : `Doctor #${a.doctorId}`),
-          specialty: a.specialty || (doctor ? doctor.specialization : 'Specialist'),
+          doctorName: (doctor ? doctor.name : (a.doctorName || `Doctor #${a.doctorId}`)),
+          specialty: (doctor ? doctor.specialization : (a.specialty || 'Specialist')),
           date: a.date,
           time: a.time || a.appointmentTime,
           status: a.status,
