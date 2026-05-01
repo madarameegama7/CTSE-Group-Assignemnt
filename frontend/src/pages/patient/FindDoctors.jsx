@@ -36,7 +36,7 @@ export default function FindDoctors() {
       usersData.filter(u => u.role === 'DOCTOR').forEach(userDoc => {
         const exists = combined.find(d => 
           (d.email && d.email !== 'N/A' && userDoc.email && userDoc.email !== 'N/A' && d.email.toLowerCase() === userDoc.email.toLowerCase()) || 
-          d.name.toLowerCase() === userDoc.name.toLowerCase()
+          (d.name && userDoc.name && d.name.toLowerCase() === userDoc.name.toLowerCase())
         );
         if (!exists) {
           combined.push({
@@ -61,7 +61,9 @@ export default function FindDoctors() {
 
   const docs = doctors.filter(d => {
     const ms = spec === 'All' || d.specialty === spec;
-    const mq = d.name.toLowerCase().includes(search.toLowerCase()) || d.specialty.toLowerCase().includes(search.toLowerCase());
+    const name = d.name || '';
+    const specialty = d.specialty || '';
+    const mq = name.toLowerCase().includes(search.toLowerCase()) || specialty.toLowerCase().includes(search.toLowerCase());
     return ms && mq;
   });
 
