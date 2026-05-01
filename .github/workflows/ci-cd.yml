@@ -9,18 +9,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
       - name: Login Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      # FRONTEND
+      # ================= FRONTEND =================
       - name: Build Frontend
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/frontend:${{ github.sha }} ./frontend
           docker push ${{ secrets.DOCKER_USERNAME }}/frontend:${{ github.sha }}
 
-      # API GATEWAY
+      # ================= API GATEWAY =================
       - name: Build API Gateway
         run: |
           cd services/api-gateway/api-gateway
@@ -29,36 +30,40 @@ jobs:
           docker build -t ${{ secrets.DOCKER_USERNAME }}/api-gateway:${{ github.sha }} .
           docker push ${{ secrets.DOCKER_USERNAME }}/api-gateway:${{ github.sha }}
 
-      # AUTH
-      - name: Build Auth
+      # ================= AUTH =================
+      - name: Build Auth Service
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/auth-service:${{ github.sha }} ./services/auth-service/auth-service
           docker push ${{ secrets.DOCKER_USERNAME }}/auth-service:${{ github.sha }}
 
-      # APPOINTMENT
-      - name: Build Appointment
+      # ================= APPOINTMENT =================
+      - name: Build Appointment Service
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/appointment:${{ github.sha }} ./services/appoinment
           docker push ${{ secrets.DOCKER_USERNAME }}/appointment:${{ github.sha }}
 
-      # DOCTOR
-      - name: Build Doctor
+      # ================= DOCTOR =================
+      - name: Build Doctor Service
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/doctor-service:${{ github.sha }} ./services/doctor-service/doctor-service
           docker push ${{ secrets.DOCKER_USERNAME }}/doctor-service:${{ github.sha }}
 
-      # PAYMENT
-      - name: Build Payment
+      # ================= PAYMENT =================
+      - name: Build Payment Service
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/payment-service:${{ github.sha }} ./services/payment-service
           docker push ${{ secrets.DOCKER_USERNAME }}/payment-service:${{ github.sha }}
 
+  # ============================================================
+  # 🚀 DEPLOY TO EC2 (FULLY AUTOMATED)
+  # ============================================================
   deploy:
     runs-on: ubuntu-latest
     needs: build-and-push
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
       - name: Copy docker-compose to EC2
         uses: appleboy/scp-action@v0.1.4
@@ -78,10 +83,13 @@ jobs:
           script: |
             cd ~/doctor-app
 
-            export IMAGE_TAG=${{ github.sha }}
+            IMAGE_TAG=${{ github.sha }}
 
-            docker compose down
-            docker compose pull
-            docker compose up -d --force-recreate
+            echo "Deploying version: $IMAGE_TAG"
+
+            docker compose down --remove-orphans
+
+            IMAGE_TAG=$IMAGE_TAG docker compose pull
+            IMAGE_TAG=$IMAGE_TAG docker compose up -d --force-recreate
 
             docker system prune -af
