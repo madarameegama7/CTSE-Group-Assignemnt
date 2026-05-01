@@ -1,36 +1,100 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 
 const AuthContext = createContext(null);
 
-const USERS = {
-  'patient@demo.com':  { id:'p1', role:'PATIENT', name:'Sarah Mitchell',   email:'patient@demo.com',  avatar:'SM', phone:'+1 555-234-5678', dob:'1990-03-15', bloodType:'A+',       password:'demo123' },
-  'doctor@demo.com':   { id:'d1', role:'DOCTOR',  name:'Dr. James Harlow', email:'doctor@demo.com',   avatar:'JH', specialty:'Cardiologist', department:'Cardiology', experience:'12 years', license:'MD-2024-0091', password:'demo123' },
-  'admin@demo.com':    { id:'a1', role:'ADMIN',   name:'Alex Chen',        email:'admin@demo.com',    avatar:'AC', password:'demo123' },
-};
-
 export function AuthProvider({ children }) {
-  const [user, setUser]   = useState(null);
+  const [user, setUser] = useState(() => {
+    try {
+      const stored = localStorage.getItem('user');
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  });
+
   const [loading, setLoading] = useState(false);
-  const [error, setError]   = useState(null);
+  const [error, setError]     = useState(null);
+
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('user');
+    }
+  }, [user]);
 
   const login = useCallback(async (email, password) => {
     setLoading(true); setError(null);
-    await new Promise(r => setTimeout(r, 900));
-    const found = USERS[email.toLowerCase()];
-    if (found && found.password === password) {
-      const { password: _, ...safe } = found;
-      setUser(safe); setLoading(false);
-      return safe;
+    try {
+      const res = await fetch('http://localhost:8080/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      let data;
+      try {
+        data = await res.json();
+      } catch (parseError) {
+        throw new Error('Unable to connect to the backend server. Please ensure the api-gateway and auth-service are running.');
+      }
+
+      if (!res.ok) {
+        const errorMsg = data?.message || data?.error || `Server responded with status ${res.status}`;
+        throw new Error(errorMsg);
+      }
+
+      const { token, role, userId } = data;
+
+      localStorage.setItem('token', token);
+
+      const loggedInUser = { email, role, userId };
+      setUser(loggedInUser);
+      setLoading(false);
+      return loggedInUser;
+
+    } catch (err) {
+      setError(err.message || 'Something went wrong');
+      setLoading(false);
+      throw err;
     }
-    setError('Invalid email or password');
-    setLoading(false);
-    throw new Error('Invalid credentials');
   }, []);
 
-  const logout = useCallback(() => setUser(null), []);
+  const register = useCallback(async (formData) => {
+    setLoading(true); setError(null);
+    try {
+      const res = await fetch('http://localhost:8080/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+
+      let data;
+      try { data = await res.json(); } catch(e) {}
+
+      if (!res.ok) {
+        throw new Error(data?.message || data?.error || `Server error: ${res.status}`);
+      }
+
+      setLoading(false);
+      return data;
+
+    } catch (err) {
+      setError(err.message || 'Registration failed');
+      setLoading(false);
+      throw err;
+    }
+  }, []);
+
+  const logout = useCallback(() => {
+
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, error, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, error, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

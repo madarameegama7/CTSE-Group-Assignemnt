@@ -1,4 +1,5 @@
-import { APPOINTMENTS, DOCTORS, USERS_LIST, MONTHLY_DATA } from '../../utils/mockData';
+import useAppointments from '../../hooks/useAppointments';
+import useDoctors from '../../hooks/useDoctors';
 import { Users, UserCheck, CalendarDays, DollarSign, TrendingUp, Activity } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 
@@ -9,6 +10,17 @@ const PIE_DATA = [
   { name:'Cancelled', value:8,  color:'#EF4444' },
 ];
 
+const MONTHLY_DATA = [
+  { month:'Jan', appointments:312, revenue:46800 },
+  { month:'Feb', appointments:285, revenue:42750 },
+  { month:'Mar', appointments:398, revenue:59700 },
+  { month:'Apr', appointments:356, revenue:53400 },
+  { month:'May', appointments:421, revenue:63150 },
+  { month:'Jun', appointments:389, revenue:58350 },
+  { month:'Jul', appointments:445, revenue:66750 },
+  { month:'Aug', appointments:412, revenue:61800 },
+];
+
 const badge = s => {
   const m = { CONFIRMED:'badge-blue', PENDING:'badge-amber', COMPLETED:'badge-green', CANCELLED:'badge-slate' };
   const l = { CONFIRMED:'Confirmed', PENDING:'Pending', COMPLETED:'Completed', CANCELLED:'Cancelled' };
@@ -16,18 +28,20 @@ const badge = s => {
 };
 
 export default function AdminDashboard() {
-  const totalRevenue = APPOINTMENTS.reduce((s,a)=>s+a.fee,0);
+  const { appointments } = useAppointments();
+  const { doctors } = useDoctors();
+  
+  const totalRevenue = appointments.reduce((s,a)=>s+(a.fee||0),0);
 
   const stats = [
     { label:'Total Patients', value:'2,847', change:'+15.2%', icon:Users,       color:'#2563EB', bg:'#EFF6FF' },
-    { label:'Active Doctors', value:DOCTORS.length,     change:'+2',     icon:UserCheck,  color:'#0D9488', bg:'#F0FDFA' },
-    { label:'Appointments',   value:'3,891', change:'+8.7%',  icon:CalendarDays,color:'#7C3AED', bg:'#F5F3FF' },
-    { label:'Revenue (Mo.)',  value:`$${(totalRevenue*12).toLocaleString()}`, change:'+12.4%', icon:DollarSign, color:'#D97706', bg:'#FFFBEB' },
+    { label:'Active Doctors', value:doctors.length,     change:'+2',     icon:UserCheck,  color:'#0D9488', bg:'#F0FDFA' },
+    { label:'Appointments',   value:appointments.length, change:'+8.7%',  icon:CalendarDays,color:'#7C3AED', bg:'#F5F3FF' },
+    { label:'Revenue (Mo.)',  value:`Rs. ${(totalRevenue*12).toLocaleString()}`, change:'+12.4%', icon:DollarSign, color:'#D97706', bg:'#FFFBEB' },
   ];
 
   return (
     <div>
-      {/* Stats */}
       <div className="stats-grid" style={{ marginBottom:24 }}>
         {stats.map(s => {
           const Icon = s.icon;
@@ -45,7 +59,6 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid-2" style={{ gap:20, marginBottom:20 }}>
-        {/* Bar chart */}
         <div className="card fade-up">
           <div className="card-header"><span className="card-title">Monthly Appointments</span></div>
           <div className="card-body">
@@ -61,7 +74,6 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Pie chart */}
         <div className="card fade-up">
           <div className="card-header"><span className="card-title">Appointment Status</span></div>
           <div className="card-body" style={{ display:'flex', alignItems:'center', gap:20 }}>
@@ -85,7 +97,6 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Revenue trend */}
       <div className="card fade-up" style={{ marginBottom:20 }}>
         <div className="card-header"><span className="card-title">Revenue Trend</span></div>
         <div className="card-body">
@@ -93,15 +104,14 @@ export default function AdminDashboard() {
             <LineChart data={MONTHLY_DATA}>
               <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
               <XAxis dataKey="month" tick={{ fontSize:11, fill:'#94A3B8' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize:11, fill:'#94A3B8' }} axisLine={false} tickLine={false} tickFormatter={v=>`$${(v/1000).toFixed(0)}k`} />
-              <Tooltip contentStyle={{ borderRadius:8, border:'1px solid #E2E8F0', fontSize:'0.82rem' }} formatter={v=>[`$${v.toLocaleString()}`,'Revenue']} />
+              <YAxis tick={{ fontSize:11, fill:'#94A3B8' }} axisLine={false} tickLine={false} tickFormatter={v=>`Rs. ${(v/1000).toFixed(0)}k`} />
+              <Tooltip contentStyle={{ borderRadius:8, border:'1px solid #E2E8F0', fontSize:'0.82rem' }} formatter={v=>[`Rs. ${v.toLocaleString()}`,'Revenue']} />
               <Line type="monotone" dataKey="revenue" stroke="#7C3AED" strokeWidth={2.5} dot={{ fill:'#7C3AED', strokeWidth:2, r:4 }} activeDot={{ r:6 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      {/* Recent appointments */}
       <div className="card fade-up">
         <div className="card-header"><span className="card-title">Recent Appointments</span></div>
         <div className="table-wrap">
@@ -110,14 +120,14 @@ export default function AdminDashboard() {
               <th>Patient</th><th>Doctor</th><th>Date</th><th>Type</th><th>Status</th><th>Fee</th>
             </tr></thead>
             <tbody>
-              {APPOINTMENTS.slice(0,6).map(a => (
+              {appointments.slice(0,6).map(a => (
                 <tr key={a.id}>
                   <td style={{ fontWeight:600 }}>{a.patientName}</td>
                   <td style={{ color:'#64748B' }}>{a.doctorName}</td>
                   <td style={{ color:'#64748B' }}>{a.date}</td>
                   <td><span className="badge badge-slate">{a.type}</span></td>
                   <td>{badge(a.status)}</td>
-                  <td style={{ fontWeight:700 }}>${a.fee}</td>
+                  <td style={{ fontWeight:700 }}>Rs. ${a.fee}</td>
                 </tr>
               ))}
             </tbody>

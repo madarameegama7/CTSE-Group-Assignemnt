@@ -1,14 +1,15 @@
 import { useState } from 'react';
-import { APPOINTMENTS } from '../../utils/mockData';
+import useAppointments from '../../hooks/useAppointments';
+import { useAuth } from '../../context/Authcontext';
 import { Search, FileText, CalendarDays } from 'lucide-react';
 
-const getPatients = () => {
+const getPatients = (appointments, doctorId) => {
   const seen = new Set();
   const patients = [];
-  APPOINTMENTS.filter(a => a.doctorId === 'd1').forEach(a => {
+  appointments.filter(a => a.doctorId === doctorId).forEach(a => {
     if (!seen.has(a.patientId)) {
       seen.add(a.patientId);
-      const appts = APPOINTMENTS.filter(x => x.patientId === a.patientId && x.doctorId === 'd1');
+      const appts = appointments.filter(x => x.patientId === a.patientId && x.doctorId === doctorId);
       const last  = appts.sort((x, y) => y.date.localeCompare(x.date))[0];
       patients.push({
         id:         a.patientId,
@@ -25,8 +26,11 @@ const getPatients = () => {
 };
 
 export default function DoctorPatients() {
+  const { user } = useAuth();
+  const { appointments, loading } = useAppointments();
   const [search, setSearch] = useState('');
-  const patients = getPatients().filter(p =>
+  
+  const patients = getPatients(appointments, user?.userId).filter(p =>
     p.name.toLowerCase().includes(search.toLowerCase())
   );
 

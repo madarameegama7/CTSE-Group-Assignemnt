@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { APPOINTMENTS } from '../../utils/mockData';
+import usePatientAppointments from '../../hooks/usePatientAppointments';
 import { CalendarDays, Clock, Search, Filter } from 'lucide-react';
 
 const TABS = ['All','Upcoming','Completed','Cancelled'];
@@ -13,7 +13,7 @@ const badge = s => {
 export default function PatientAppointments() {
   const [tab, setTab]       = useState('All');
   const [search, setSearch] = useState('');
-  const all = APPOINTMENTS.filter(a => a.patientId === 'p1');
+  const { appointments: all, loading } = usePatientAppointments();
 
   const filtered = all.filter(a => {
     const matchTab =
@@ -27,7 +27,6 @@ export default function PatientAppointments() {
 
   return (
     <div>
-      {/* Toolbar */}
       <div style={{ display:'flex', gap:12, marginBottom:20, alignItems:'center', flexWrap:'wrap' }}>
         <div className="search-wrap" style={{ flex:1, minWidth:200 }}>
           <Search size={15} />
@@ -41,25 +40,22 @@ export default function PatientAppointments() {
         <button className="btn btn-outline"><Filter size={14} /> Filter</button>
       </div>
 
-      {/* Tabs */}
       <div style={tabBar}>
         {TABS.map(t => (
           <button key={t} style={{ ...tabBtn, ...(tab===t ? tabActive : {}) }} onClick={() => setTab(t)}>{t}</button>
         ))}
       </div>
 
-      {/* List */}
       <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
         {filtered.length === 0 ? (
           <div className="card"><div className="empty-state"><CalendarDays size={36} /><p>No appointments found.</p></div></div>
         ) : filtered.map(a => (
           <div className="card fade-up" key={a.id} style={{ padding:0, overflow:'hidden' }}>
             <div style={apptRow}>
-              {/* Left accent */}
               <div style={{ width:4, background: a.status==='CONFIRMED'?'#2563EB':a.status==='PENDING'?'#F59E0B':a.status==='COMPLETED'?'#16A34A':'#CBD5E1', flexShrink:0, alignSelf:'stretch' }} />
 
               <div className="doc-avatar" style={{ background:'#DBEAFE', color:'#1D4ED8', margin:'0 4px' }}>
-                {a.doctorName.split(' ').map(w=>w[0]).join('').slice(0,2)}
+                {(a.doctorName || 'DR').split(' ').map(w=>w[0]).join('').slice(0,2)}
               </div>
 
               <div style={{ flex:1, minWidth:0 }}>
@@ -72,7 +68,7 @@ export default function PatientAppointments() {
                 <div style={{ display:'flex', gap:16, fontSize:'0.78rem', color:'#94A3B8' }}>
                   <span style={{ display:'flex', alignItems:'center', gap:4 }}><CalendarDays size={12} />{a.date}</span>
                   <span style={{ display:'flex', alignItems:'center', gap:4 }}><Clock size={12} />{a.time}</span>
-                  <span style={{ fontWeight:600, color:'#475569' }}>${a.fee}</span>
+                  <span style={{ fontWeight:600, color:'#475569' }}>Rs. ${a.fee}</span>
                 </div>
                 {a.notes && <div style={noteStyle}>{a.notes}</div>}
               </div>

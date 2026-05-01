@@ -7,53 +7,41 @@ spring:
 
   cloud:
     gateway:
-      discovery:
-        locator:
-          enabled: true
-          lower-case-service-id: true
-
-      routes:
-        - id: auth-service
-          uri: lb://auth-service
-          predicates:
-            - Path=/api/auth/**
-
-        - id: doctor-service
-          uri: lb://doctor-service
-          predicates:
-            - Path=/api/doctors/**
-
-      # Global CORS config for frontend development
       server:
-        port: 8080
+        webflux:
+          discovery:
+            locator:
+              enabled: false
+              lower-case-service-id: true
 
-      spring:
-        application:
-          name: api-gateway
+          routes:
+            - id: auth-service
+              uri: http://auth-service:8080
+              predicates:
+                - Path=/api/auth/**
 
-        cloud:
-          gateway:
-            discovery:
-              locator:
-                enabled: true
-                lower-case-service-id: true
+            - id: doctor-service
+              uri: http://doctor-service:8080
+              predicates:
+                - Path=/api/doctors/**
 
-            routes:
-              - id: auth-service
-                uri: lb://auth-service
-                predicates:
-                  - Path=/api/auth/**
+            - id: appointment-service
+              uri: http://appoinment:8080
+              predicates:
+                - Path=/api/appointments/**
 
-              - id: doctor-service
-                uri: lb://doctor-service
-                predicates:
-                  - Path=/api/doctors/**
+            - id: payment-service
+              uri: http://payment-service:8080
+              predicates:
+                - Path=/api/payments/**
 
-                globalcors:
-                  add-to-simple-url-handler-mapping: true
-                  cors-configurations:
-                    '[/**]':
-                      allowedOriginPatterns: "*"
-                      allowedMethods: "*"
-                      allowedHeaders: "*"
-                      allowCredentials: false
+
+
+          globalcors:
+            add-to-simple-url-handler-mapping: true
+            cors-configurations:
+              '[/**]':
+                allowedOriginPatterns: "*"
+                allowedMethods: "*"
+                allowedHeaders: "*"
+                allowCredentials: false

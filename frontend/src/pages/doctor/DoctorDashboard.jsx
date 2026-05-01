@@ -1,5 +1,5 @@
-import { useAuth } from '../../context/AuthContext';
-import { APPOINTMENTS } from '../../utils/mockData';
+import { useAuth } from '../../context/Authcontext';
+import useAppointments from '../../hooks/useAppointments';
 import { CalendarDays, Users, CheckCircle2, Clock, ArrowRight, Circle } from 'lucide-react';
 
 const badge = s => {
@@ -8,10 +8,13 @@ const badge = s => {
   return <span className={`badge ${m[s]||'badge-slate'}`}>{l[s]||s}</span>;
 };
 
+const getTodayDate = () => new Date().toISOString().split('T')[0];
+
 export default function DoctorDashboard() {
   const { user } = useAuth();
-  const mine = APPOINTMENTS.filter(a => a.doctorId === 'd1');
-  const today = mine.filter(a => a.date === '2026-03-21');
+  const { appointments, loading } = useAppointments();
+  const mine = appointments.filter(a => a.doctorId === user?.userId);
+  const today = mine.filter(a => a.date === getTodayDate());
   const pending = mine.filter(a => a.status === 'PENDING');
   const done = mine.filter(a => a.status === 'COMPLETED');
 
@@ -24,7 +27,6 @@ export default function DoctorDashboard() {
 
   return (
     <div>
-      {/* Banner */}
       <div style={{ ...banner, background:'linear-gradient(135deg,#0D7377,#0D9488)' }}>
         <div>
           <h2 style={bannerTitle}>Good morning, {user?.name} 👨‍⚕️</h2>
@@ -38,7 +40,6 @@ export default function DoctorDashboard() {
         </div>
       </div>
 
-      {/* Stats */}
       <div className="stats-grid" style={{ marginBottom:24 }}>
         {stats.map(s => {
           const Icon = s.icon;
@@ -55,7 +56,6 @@ export default function DoctorDashboard() {
       </div>
 
       <div className="grid-2" style={{ gap:20 }}>
-        {/* Today's schedule */}
         <div className="card fade-up">
           <div className="card-header">
             <span className="card-title">Today's Schedule</span>
@@ -81,7 +81,6 @@ export default function DoctorDashboard() {
           </div>
         </div>
 
-        {/* Pending review */}
         <div className="card fade-up">
           <div className="card-header">
             <span className="card-title">Pending Requests</span>
@@ -110,7 +109,6 @@ export default function DoctorDashboard() {
         </div>
       </div>
 
-      {/* All appointments table */}
       <div className="card fade-up" style={{ marginTop:20 }}>
         <div className="card-header">
           <span className="card-title">All Appointments</span>
@@ -133,7 +131,7 @@ export default function DoctorDashboard() {
                   <td>{a.time}</td>
                   <td><span className="badge badge-slate">{a.type}</span></td>
                   <td>{badge(a.status)}</td>
-                  <td style={{ fontWeight:600 }}>${a.fee}</td>
+                  <td style={{ fontWeight:600 }}>Rs. ${a.fee}</td>
                   <td><button className="btn btn-ghost btn-sm">View <ArrowRight size={12} /></button></td>
                 </tr>
               ))}

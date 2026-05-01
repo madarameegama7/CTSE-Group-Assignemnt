@@ -21,7 +21,7 @@ public class AppointmentRequest {
     private LocalDate date;
 
     @NotNull(message = "Time is required")
-    @JsonFormat(pattern = "HH:mm")
+    @JsonFormat(pattern = "HH:mm:ss")
     private LocalTime time;
 }
 

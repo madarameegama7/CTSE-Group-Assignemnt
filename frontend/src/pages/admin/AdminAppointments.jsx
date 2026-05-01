@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { APPOINTMENTS } from '../../utils/mockData';
+import useAllAppointments from '../../hooks/useAllAppointments';
 import { Search, Download } from 'lucide-react';
 
 const badge = s => {
@@ -11,10 +11,11 @@ const badge = s => {
 const STATUSES = ['All', 'CONFIRMED', 'PENDING', 'COMPLETED', 'CANCELLED'];
 
 export default function AdminAppointments() {
+  const { appointments, loading } = useAllAppointments();
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('All');
 
-  const filtered = APPOINTMENTS.filter(a => {
+  const filtered = appointments.filter(a => {
     const ms = status === 'All' || a.status === status;
     const mq = a.patientName.toLowerCase().includes(search.toLowerCase()) ||
                a.doctorName.toLowerCase().includes(search.toLowerCase());
@@ -34,7 +35,7 @@ export default function AdminAppointments() {
             onClick={() => setStatus(s)}
           >
             <div className="stat-tile-value" style={{ fontSize: '1.5rem' }}>
-              {APPOINTMENTS.filter(a => a.status === s).length}
+              {appointments.filter(a => a.status === s).length}
             </div>
             <div className="stat-tile-label">{s.charAt(0) + s.slice(1).toLowerCase()}</div>
           </div>
@@ -77,14 +78,14 @@ export default function AdminAppointments() {
             <tbody>
               {filtered.map(a => (
                 <tr key={a.id}>
-                  <td style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#94A3B8' }}>#{a.id.toUpperCase()}</td>
+                  <td style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: '#94A3B8' }}>#{a.id}</td>
                   <td style={{ fontWeight: 600, color: '#0F172A' }}>{a.patientName}</td>
                   <td style={{ color: '#64748B' }}>{a.doctorName}</td>
                   <td style={{ color: '#64748B' }}>{a.date}</td>
                   <td style={{ color: '#64748B' }}>{a.time}</td>
                   <td><span className="badge badge-slate">{a.type}</span></td>
                   <td>{badge(a.status)}</td>
-                  <td style={{ fontWeight: 700, color: '#0F172A' }}>${a.fee}</td>
+                  <td style={{ fontWeight: 700, color: '#0F172A' }}>Rs. ${a.fee}</td>
                 </tr>
               ))}
             </tbody>

@@ -1,34 +1,95 @@
 import { useState } from 'react';
-import { DOCTORS, SLOTS } from '../../utils/mockData';
+
+import useDoctors from '../../hooks/useDoctors';
+import { useAuth } from '../../context/Authcontext';
+import { api } from '../../services/api';
 import { Search, Star, Filter, X, CalendarDays, Clock, CheckCircle2 } from 'lucide-react';
 
 const SPECIALTIES = ['All','Cardiologist','Neurologist','Orthopedic','Dermatologist','Pediatrician','Psychiatrist'];
 
+  const getTodayDate = () => new Date().toISOString().split('T')[0];
+
 export default function FindDoctors() {
   const [search, setSearch]     = useState('');
   const [spec, setSpec]         = useState('All');
-  const [booking, setBooking]   = useState(null); // doctor being booked
-  const [step, setStep]         = useState(1);    // 1=slot, 2=confirm, 3=done
+  const [booking, setBooking]   = useState(null); 
+  const [step, setStep]         = useState(1);    
   const [selSlot, setSelSlot]   = useState(null);
-  const [selDate, setSelDate]   = useState('2026-03-25');
+  const [selDate, setSelDate]   = useState(getTodayDate());
   const [apptType, setApptType] = useState('Consultation');
 
-  const docs = DOCTORS.filter(d => {
+  const { user } = useAuth();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  
+  const [availableSlots, setAvailableSlots] = useState([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
+
+  const { doctors: docsData, loading } = useDoctors();
+
+  const docs = docsData.filter(d => {
     const ms = spec === 'All' || d.specialty === spec;
     const mq = d.name.toLowerCase().includes(search.toLowerCase()) || d.specialty.toLowerCase().includes(search.toLowerCase());
     return ms && mq;
   });
 
-  const openBooking = doc => { setBooking(doc); setStep(1); setSelSlot(null); };
-  const closeBooking = () => { setBooking(null); setStep(1); };
-  const handleBook = () => {
+  const loadSlots = async (docId, d) => {
+    setSlotsLoading(true); setSelSlot(null);
+    try {
+      const resp = await api.get(`/doctors/${docId}/slots`);
+      const filtered = resp.filter(s => s.date === d);
+      setAvailableSlots(filtered.map(s => ({
+        id: s.slotId,
+        time: s.startTime.substring(0, 5),
+        available: s.available
+      })));
+    } catch(err) {
+      setAvailableSlots([]);
+    } finally {
+      setSlotsLoading(false);
+    }
+  };
+
+  const openBooking = doc => { 
+    setBooking(doc); setStep(1); setSelSlot(null); setErrorMsg(''); 
+    loadSlots(doc.id, selDate);
+  };
+  const closeBooking = () => { setBooking(null); setStep(1); setErrorMsg(''); };
+
+  const handleDateChange = (e) => {
+    const d = e.target.value;
+    setSelDate(d);
+    if (booking) loadSlots(booking.id, d);
+  };
+
+  const handleBook = async () => {
     if (step === 1 && selSlot) setStep(2);
-    else if (step === 2) setStep(3);
+    else if (step === 2) {
+      if (!user) {
+        setErrorMsg('Please log in to confirm booking.');
+        return;
+      }
+      setIsProcessing(true);
+      setErrorMsg('');
+      try {
+        const apptData = await api.post('/appointments', {
+            patientId: user.userId,
+            doctorId: parseInt(booking.id),
+            date: selDate,
+            time: selSlot.time + ":00"
+        });
+        
+        setStep(3);
+      } catch (err) {
+        setErrorMsg(err.message);
+      } finally {
+        setIsProcessing(false);
+      }
+    }
   };
 
   return (
     <div>
-      {/* Search + filter */}
       <div style={{ display:'flex', gap:12, marginBottom:20, flexWrap:'wrap' }}>
         <div className="search-wrap" style={{ flex:1, minWidth:220 }}>
           <Search size={15} />
@@ -40,7 +101,9 @@ export default function FindDoctors() {
         <button className="btn btn-outline"><Filter size={14} /> Filter</button>
       </div>
 
-      <p style={{ fontSize:'0.8rem', color:'#94A3B8', marginBottom:16 }}>{docs.length} doctors found</p>
+      <p style={{ fontSize:'0.8rem', color:'#94A3B8', marginBottom:16 }}>
+        {loading ? 'Loading doctors...' : `${docs.length} doctors found`}
+      </p>
 
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))', gap:16 }}>
         {docs.map(doc => (
@@ -64,10 +127,10 @@ export default function FindDoctors() {
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', borderTop:'1px solid #F1F5F9', paddingTop:12 }}>
                 <div>
                   <div style={{ fontSize:'0.78rem', color:'#94A3B8' }}>Consultation fee</div>
-                  <div style={{ fontWeight:700, fontSize:'1rem', color:'#0F172A' }}>${doc.fee}</div>
+                  <div style={{ fontWeight:700, fontSize:'1rem', color:'#0F172A' }}>Rs. ${doc.fee}</div>
                 </div>
                 <div style={{ textAlign:'right' }}>
-                  <div style={{ fontSize:'0.72rem', color:'#94A3B8', marginBottom:2 }}>Next available</div>
+                  <div style={{ fontSize:'0.72rem', color:'#94A3B8', marginBottom:2 }}>Availability</div>
                   <span className={`badge ${doc.available ? 'badge-green' : 'badge-slate'}`} style={{ fontSize:'0.7rem' }}>{doc.nextSlot}</span>
                 </div>
               </div>
@@ -86,7 +149,6 @@ export default function FindDoctors() {
         ))}
       </div>
 
-      {/* Booking modal */}
       {booking && (
         <div className="modal-overlay" onClick={e => { if (e.target === e.currentTarget) closeBooking(); }}>
           <div className="modal" style={{ maxWidth: step===3 ? 400 : 520 }}>
@@ -105,7 +167,7 @@ export default function FindDoctors() {
                   <div className="grid-2" style={{ marginBottom:16 }}>
                     <div className="form-group" style={{ marginBottom:0 }}>
                       <label className="form-label">Date</label>
-                      <input type="date" className="form-input" value={selDate} onChange={e=>setSelDate(e.target.value)} />
+                      <input type="date" className="form-input" value={selDate} onChange={handleDateChange} />
                     </div>
                     <div className="form-group" style={{ marginBottom:0 }}>
                       <label className="form-label">Type</label>
@@ -115,8 +177,11 @@ export default function FindDoctors() {
                     </div>
                   </div>
                   <label className="form-label">Available Slots</label>
+                  
+                  {slotsLoading ? <p style={{fontSize:'0.8rem', color:'#64748B'}}>Loading slots...</p> : 
+                    availableSlots.length === 0 ? <p style={{fontSize:'0.8rem', color:'#EF4444'}}>No time slots found for this date.</p> :
                   <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:8 }}>
-                    {SLOTS.map(s => (
+                    {availableSlots.map(s => (
                       <button
                         key={s.id}
                         disabled={!s.available}
@@ -131,7 +196,7 @@ export default function FindDoctors() {
                         {s.time}
                       </button>
                     ))}
-                  </div>
+                  </div>}
                 </>
               )}
 
@@ -142,7 +207,8 @@ export default function FindDoctors() {
                   <div style={confirmRow}><span>Date</span><strong>{selDate}</strong></div>
                   <div style={confirmRow}><span>Time</span><strong>{selSlot?.time}</strong></div>
                   <div style={confirmRow}><span>Type</span><strong>{apptType}</strong></div>
-                  <div style={confirmRow}><span>Fee</span><strong>${booking.fee}</strong></div>
+                  <div style={confirmRow}><span>Fee</span><strong>Rs. ${booking.fee}</strong></div>
+                  {errorMsg && <div style={{ color:'#EF4444', fontSize:'0.85rem', textAlign:'center', marginTop:10, padding:'8px', background:'#FEF2F2', borderRadius:'6px' }}>{errorMsg}</div>}
                 </div>
               )}
 
@@ -162,11 +228,11 @@ export default function FindDoctors() {
 
             {step < 3 && (
               <div className="modal-footer">
-                <button className="btn btn-outline" onClick={step===1 ? closeBooking : ()=>setStep(1)}>
+                <button className="btn btn-outline" disabled={isProcessing} onClick={step===1 ? closeBooking : ()=>setStep(1)}>
                   {step===1 ? 'Cancel' : 'Back'}
                 </button>
-                <button className="btn btn-primary" onClick={handleBook} disabled={step===1&&!selSlot}>
-                  {step===1 ? 'Continue' : 'Confirm Booking'}
+                <button className="btn btn-primary" onClick={handleBook} disabled={(step===1&&!selSlot) || isProcessing}>
+                  {isProcessing ? 'Processing...' : (step===1 ? 'Continue' : 'Confirm Booking')}
                 </button>
               </div>
             )}

@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/paymentdb
+    url: jdbc:postgresql://postgres-payment:5432/paymentdb
     username: postgres
     password: 1234
 
@@ -16,11 +16,11 @@ spring:
     name: payment-service
 
 server:
-  port: 8083
+  port: 8080
 
-# Feign client target for appointment service
 appointment:
-  url: http://localhost:8082
+  service:
+    url: http://api-gateway:8080/api/appointments
 
 jwt:
   secret: 08788b9566dad0f379f4530d090c9163cc199fdf76eef8443bee827d05bee706fff39966

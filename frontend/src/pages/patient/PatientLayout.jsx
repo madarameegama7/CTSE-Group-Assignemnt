@@ -2,10 +2,10 @@ import { Outlet } from 'react-router-dom';
 import { Bell, Menu } from 'lucide-react';
 import { useState } from 'react';
 import Sidebar from '../../components/Sidebar';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/Authcontext';
 import {
   LayoutDashboard, CalendarDays, Search,
-  FileText, Settings, User
+  FileText, Settings, User, CreditCard
 } from 'lucide-react';
 
 const NAV = [

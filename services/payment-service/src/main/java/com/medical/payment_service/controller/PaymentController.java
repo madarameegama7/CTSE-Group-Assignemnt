@@ -36,6 +36,12 @@ public class PaymentController {
         );
     }
 
+    @Operation(summary = "Get all payments system-wide")
+    @GetMapping
+    public ResponseEntity<List<PaymentResponse>> getAllPayments() {
+        return ResponseEntity.ok(paymentService.getAllPayments());
+    }
+
     @Operation(summary = "Get payment by ID")
     @GetMapping("/{paymentId}")
     public ResponseEntity<PaymentResponse> getPaymentById(@PathVariable int paymentId) {

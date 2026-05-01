@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/doctordb
+    url: jdbc:postgresql://postgres-doctor:5432/doctordb
     username: postgres
     password: 1234
 
@@ -16,10 +16,14 @@ spring:
     name: doctor-service
 
 server:
-  port: 8082
+  port: 8080
 
 jwt:
   secret: 08788b9566dad0f379f4530d090c9163cc199fdf76eef8443bee827d05bee706fff39966
+
+auth:
+  service:
+    url: http://api-gateway:8080/api/auth
 
 eureka:
   client:
@@ -28,3 +32,4 @@ eureka:
 logging:
   level:
     org.springframework.security: DEBUG
+    org.springframework.web.reactive.function.client.ExchangeFunctions: DEBUG

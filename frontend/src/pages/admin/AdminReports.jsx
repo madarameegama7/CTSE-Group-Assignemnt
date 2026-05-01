@@ -1,4 +1,5 @@
-import { MONTHLY_DATA, DOCTORS } from '../../utils/mockData';
+import useAppointments from '../../hooks/useAppointments';
+import useDoctors from '../../hooks/useDoctors';
 import {
   AreaChart, Area, LineChart, Line, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
@@ -13,16 +14,29 @@ const DEPT_DATA = [
   { dept: 'Psychiatry',  patients: 143 },
 ];
 
+const MONTHLY_DATA = [
+  { month:'Jan', appointments:312, revenue:46800 },
+  { month:'Feb', appointments:285, revenue:42750 },
+  { month:'Mar', appointments:398, revenue:59700 },
+  { month:'Apr', appointments:356, revenue:53400 },
+  { month:'May', appointments:421, revenue:63150 },
+  { month:'Jun', appointments:389, revenue:58350 },
+  { month:'Jul', appointments:445, revenue:66750 },
+  { month:'Aug', appointments:412, revenue:61800 },
+];
+
 const tooltipStyle = {
   borderRadius: 8, border: '1px solid #E2E8F0',
   fontSize: '0.82rem', boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
 };
 
 export default function AdminReports() {
+  const { appointments } = useAppointments();
+  const { doctors } = useDoctors();
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <div className="grid-2" style={{ gap: 20 }}>
-        {/* Appointments area chart */}
         <div className="card fade-up">
           <div className="card-header">
             <span className="card-title">Appointments Over Time</span>
@@ -47,7 +61,6 @@ export default function AdminReports() {
           </div>
         </div>
 
-        {/* Revenue line chart */}
         <div className="card fade-up">
           <div className="card-header">
             <span className="card-title">Revenue Trend</span>
@@ -61,9 +74,9 @@ export default function AdminReports() {
                 <YAxis
                   tick={{ fontSize: 11, fill: '#94A3B8' }}
                   axisLine={false} tickLine={false}
-                  tickFormatter={v => `$${(v / 1000).toFixed(0)}k`}
+                  tickFormatter={v => `Rs. ${(v / 1000).toFixed(0)}k`}
                 />
-                <Tooltip contentStyle={tooltipStyle} formatter={v => [`$${v.toLocaleString()}`, 'Revenue']} />
+                <Tooltip contentStyle={tooltipStyle} formatter={v => [`Rs. ${v.toLocaleString()}`, 'Revenue']} />
                 <Line type="monotone" dataKey="revenue" stroke="#0D9488" strokeWidth={2.5} dot={{ fill: '#0D9488', r: 4 }} activeDot={{ r: 6 }} />
               </LineChart>
             </ResponsiveContainer>
@@ -71,7 +84,6 @@ export default function AdminReports() {
         </div>
       </div>
 
-      {/* Department breakdown */}
       <div className="card fade-up">
         <div className="card-header">
           <span className="card-title">Patients by Department</span>
@@ -89,7 +101,6 @@ export default function AdminReports() {
         </div>
       </div>
 
-      {/* Top doctors */}
       <div className="card fade-up">
         <div className="card-header">
           <span className="card-title">Top Performing Doctors</span>
@@ -119,7 +130,7 @@ export default function AdminReports() {
                   <td style={{ color: '#64748B' }}>{doc.specialty}</td>
                   <td style={{ fontWeight: 700, color: '#D97706' }}>⭐ {doc.rating}</td>
                   <td style={{ color: '#64748B' }}>{doc.reviews}</td>
-                  <td style={{ fontWeight: 700 }}>${(doc.fee * doc.reviews * 0.6).toLocaleString()}</td>
+                  <td style={{ fontWeight: 700 }}>Rs. ${(doc.fee * doc.reviews * 0.6).toLocaleString()}</td>
                 </tr>
               ))}
             </tbody>
