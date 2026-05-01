@@ -16,7 +16,7 @@ public class AuthServiceClient {
 
     private final WebClient webClient;
 
-    @Value("${auth.service.url:http://localhost:8080/api/auth}")
+    @Value("${auth.service.url:http://16.16.115.241:8080/api/auth}")
     private String authServiceUrl;
 
     public Mono<AuthValidationResponse> validateToken(String token) {
