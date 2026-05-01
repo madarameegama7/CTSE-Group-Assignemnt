@@ -13,7 +13,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # ---------------- DEBUG (optional but useful) ----------------
+      # ---------------- DEBUG ----------------
       - name: Show project structure
         run: ls -R
 
@@ -30,7 +30,7 @@ jobs:
           docker push ${{ secrets.DOCKER_USERNAME }}/frontend
 
       # ============================================================
-      # API GATEWAY
+      # API GATEWAY (Gradle)
       # ============================================================
       - name: Build API Gateway JAR
         run: |
@@ -44,56 +44,32 @@ jobs:
           docker push ${{ secrets.DOCKER_USERNAME }}/api-gateway
 
       # ============================================================
-      # AUTH SERVICE
+      # AUTH SERVICE (Maven - Docker handles build)
       # ============================================================
-      - name: Build Auth Service JAR
-        run: |
-          cd services/auth-service/auth-service
-          chmod +x gradlew
-          ./gradlew build
-
       - name: Build Auth Service Image
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/auth-service ./services/auth-service/auth-service
           docker push ${{ secrets.DOCKER_USERNAME }}/auth-service
 
       # ============================================================
-      # APPOINTMENT SERVICE
+      # APPOINTMENT SERVICE (Maven)
       # ============================================================
-      - name: Build Appointment Service JAR
-        run: |
-          cd services/appoinment
-          chmod +x gradlew
-          ./gradlew build
-
       - name: Build Appointment Service Image
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/appointment ./services/appoinment
           docker push ${{ secrets.DOCKER_USERNAME }}/appointment
 
       # ============================================================
-      # DOCTOR SERVICE
+      # DOCTOR SERVICE (Maven)
       # ============================================================
-      - name: Build Doctor Service JAR
-        run: |
-          cd services/doctor-service/doctor-service
-          chmod +x gradlew
-          ./gradlew build
-
       - name: Build Doctor Service Image
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/doctor-service ./services/doctor-service/doctor-service
           docker push ${{ secrets.DOCKER_USERNAME }}/doctor-service
 
       # ============================================================
-      # PAYMENT SERVICE
+      # PAYMENT SERVICE (Maven)
       # ============================================================
-      - name: Build Payment Service JAR
-        run: |
-          cd services/payment-service
-          chmod +x gradlew
-          ./gradlew build
-
       - name: Build Payment Service Image
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/payment-service ./services/payment-service
