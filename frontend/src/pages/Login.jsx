@@ -1,13 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/Authcontext';
-import { Activity, Eye, EyeOff, Heart, Stethoscope, Shield } from 'lucide-react';
-
-const ACCOUNT_TYPES = [
-  { role:'PATIENT', icon:Heart,       color:'#2563EB', label:'Patient',  desc:'Book & manage appointments' },
-  { role:'DOCTOR',  icon:Stethoscope, color:'#0D9488', label:'Doctor',   desc:'Manage schedule & patients'  },
-  { role:'ADMIN',   icon:Shield,      color:'#7C3AED', label:'Admin',    desc:'System & user management'    },
-];
+import { Activity, Eye, EyeOff } from 'lucide-react';
 
 const REDIRECT = { PATIENT:'/patient/dashboard', DOCTOR:'/doctor/dashboard', ADMIN:'/admin/dashboard' };
 
@@ -15,11 +9,8 @@ export default function Login() {
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [showPw, setShowPw]     = useState(false);
-  const [selected, setSelected] = useState(null);
   const { login, loading, error } = useAuth();
   const navigate = useNavigate();
-
-  const pick = (acc) => { setSelected(acc); };
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -60,32 +51,7 @@ export default function Login() {
         <div style={styles.formCard}>
           <div style={styles.formHeader}>
             <h2 style={styles.formTitle}>Sign in to MediBook</h2>
-            <p style={styles.formSub}>Choose your account type below</p>
-          </div>
-
-          <div style={styles.tileRow}>
-            {ACCOUNT_TYPES.map(acc => {
-              const Icon = acc.icon;
-              const active = selected?.role === acc.role;
-              return (
-                <button
-                  key={acc.role}
-                  onClick={() => pick(acc)}
-                  style={{
-                    ...styles.tile,
-                    borderColor: active ? acc.color : '#E2E8F0',
-                    background:  active ? `${acc.color}0D` : '#fff',
-                    boxShadow:   active ? `0 0 0 2px ${acc.color}33` : 'none',
-                  }}
-                >
-                  <div style={{ ...styles.tileIcon, background: active ? `${acc.color}20` : '#F1F5F9', color: active ? acc.color : '#94A3B8' }}>
-                    <Icon size={17} />
-                  </div>
-                  <span style={{ ...styles.tileLabel, color: active ? acc.color : '#334155' }}>{acc.label}</span>
-                  <span style={styles.tileDesc}>{acc.desc}</span>
-                </button>
-              );
-            })}
+            <p style={styles.formSub}>Enter your credentials to access your account</p>
           </div>
 
           <form onSubmit={handleSubmit} style={styles.form}>
@@ -125,11 +91,11 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              style={{ ...styles.submitBtn, background: selected?.color || '#2563EB' }}
+              style={{ ...styles.submitBtn, background: '#2563EB' }}
             >
               {loading
                 ? <span style={styles.btnSpinner} />
-                : `Sign in${selected ? ` as ${selected.label}` : ''}`
+                : 'Sign in'
               }
             </button>
 
@@ -179,16 +145,6 @@ const styles = {
   formHeader: { marginBottom:24 },
   formTitle:  { fontFamily:"'Lexend',sans-serif", fontSize:'1.4rem', fontWeight:700, color:'#0F172A', letterSpacing:'-0.02em', marginBottom:4 },
   formSub:    { fontSize:'0.85rem', color:'#64748B' },
-
-  tileRow: { display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10, marginBottom:24 },
-  tile: {
-    display:'flex', flexDirection:'column', alignItems:'center', gap:6,
-    padding:'14px 8px', borderRadius:12, border:'1.5px solid #E2E8F0',
-    cursor:'pointer', transition:'all 0.18s ease', background:'white', textAlign:'center',
-  },
-  tileIcon:  { width:38, height:38, borderRadius:10, display:'flex', alignItems:'center', justifyContent:'center', transition:'all 0.18s ease' },
-  tileLabel: { fontSize:'0.8rem', fontWeight:700, transition:'color 0.18s ease' },
-  tileDesc:  { fontSize:'0.68rem', color:'#94A3B8', lineHeight:1.3 },
 
   form: { display:'flex', flexDirection:'column', gap:14 },
 

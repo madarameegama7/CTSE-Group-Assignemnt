@@ -67,7 +67,7 @@ export default function DoctorAppointments() {
                 <div style={{ display: 'flex', gap: 16, fontSize: '0.78rem', color: '#94A3B8' }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><CalendarDays size={12} />{a.date}</span>
                   <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Clock size={12} />{a.time}</span>
-                  <span style={{ fontWeight: 600, color: '#475569' }}>Rs. ${a.fee}</span>
+                  <span style={{ fontWeight: 600, color: '#475569' }}>Rs. {a.fee}</span>
                 </div>
                 {a.notes && (
                   <div style={{ marginTop: 6, background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 6, padding: '5px 10px', fontSize: '0.75rem', color: '#64748B' }}>
