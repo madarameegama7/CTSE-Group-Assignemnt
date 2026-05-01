@@ -31,13 +31,20 @@ export default function FindDoctors() {
   const [doctors, setDoctors] = useState([]);
 
   useEffect(() => {
-    const combined = [...docsData];
+    const combined = [...(docsData || [])].filter(Boolean);
     if (usersData && usersData.length > 0) {
-      usersData.filter(u => u.role === 'DOCTOR').forEach(userDoc => {
-        const exists = combined.find(d => 
-          (d.email && d.email !== 'N/A' && userDoc.email && userDoc.email !== 'N/A' && d.email.toLowerCase() === userDoc.email.toLowerCase()) || 
-          (d.name && userDoc.name && d.name.toLowerCase() === userDoc.name.toLowerCase())
-        );
+      usersData.filter(u => u && u.role === 'DOCTOR').forEach(userDoc => {
+        const exists = combined.find(d => {
+          if (!d) return false;
+          const dEmail = String(d.email || '').toLowerCase();
+          const uEmail = String(userDoc.email || '').toLowerCase();
+          const dName = String(d.name || '').toLowerCase();
+          const uName = String(userDoc.name || '').toLowerCase();
+          
+          return (dEmail !== '' && dEmail !== 'n/a' && dEmail === uEmail) || 
+                 (dName !== '' && dName === uName);
+        });
+        
         if (!exists) {
           combined.push({
             id: 'usr_' + userDoc.id,
@@ -50,7 +57,7 @@ export default function FindDoctors() {
             available: true,
             rating: 0,
             reviews: 0,
-            avatar: (userDoc.name || 'Unknown Doctor').split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase(),
+            avatar: String(userDoc.name || 'Unknown Doctor').split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase(),
             nextSlot: 'Not set'
           });
         }
@@ -60,10 +67,12 @@ export default function FindDoctors() {
   }, [docsData, usersData]);
 
   const docs = doctors.filter(d => {
+    if (!d) return false;
     const ms = spec === 'All' || d.specialty === spec;
-    const name = d.name || '';
-    const specialty = d.specialty || '';
-    const mq = name.toLowerCase().includes(search.toLowerCase()) || specialty.toLowerCase().includes(search.toLowerCase());
+    const name = String(d.name || '').toLowerCase();
+    const specialty = String(d.specialty || '').toLowerCase();
+    const searchLower = String(search || '').toLowerCase();
+    const mq = name.includes(searchLower) || specialty.includes(searchLower);
     return ms && mq;
   });
 
