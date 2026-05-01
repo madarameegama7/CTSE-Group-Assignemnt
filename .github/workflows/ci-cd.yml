@@ -9,45 +9,92 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # ---------------- CHECKOUT ----------------
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Login to Docker Hub
+      # ---------------- DEBUG (optional but useful) ----------------
+      - name: Show project structure
+        run: ls -R
+
+      # ---------------- LOGIN DOCKER ----------------
       - name: Login to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      # -------- FRONTEND --------
-      - name: Build Frontend
+      # ============================================================
+      # FRONTEND
+      # ============================================================
+      - name: Build Frontend Image
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/frontend ./frontend
           docker push ${{ secrets.DOCKER_USERNAME }}/frontend
 
-      # -------- API GATEWAY --------
-      - name: Build API Gateway
+      # ============================================================
+      # API GATEWAY
+      # ============================================================
+      - name: Build API Gateway JAR
+        run: |
+          cd services/api-gateway/api-gateway
+          chmod +x gradlew
+          ./gradlew build
+
+      - name: Build API Gateway Image
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/api-gateway ./services/api-gateway/api-gateway
           docker push ${{ secrets.DOCKER_USERNAME }}/api-gateway
 
-      # -------- AUTH SERVICE --------
-      - name: Build Auth Service
+      # ============================================================
+      # AUTH SERVICE
+      # ============================================================
+      - name: Build Auth Service JAR
+        run: |
+          cd services/auth-service/auth-service
+          chmod +x gradlew
+          ./gradlew build
+
+      - name: Build Auth Service Image
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/auth-service ./services/auth-service/auth-service
           docker push ${{ secrets.DOCKER_USERNAME }}/auth-service
 
-      # -------- APPOINTMENT --------
-      - name: Build Appointment Service
+      # ============================================================
+      # APPOINTMENT SERVICE
+      # ============================================================
+      - name: Build Appointment Service JAR
+        run: |
+          cd services/appoinment
+          chmod +x gradlew
+          ./gradlew build
+
+      - name: Build Appointment Service Image
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/appointment ./services/appoinment
           docker push ${{ secrets.DOCKER_USERNAME }}/appointment
 
-      # -------- DOCTOR --------
-      - name: Build Doctor Service
+      # ============================================================
+      # DOCTOR SERVICE
+      # ============================================================
+      - name: Build Doctor Service JAR
+        run: |
+          cd services/doctor-service/doctor-service
+          chmod +x gradlew
+          ./gradlew build
+
+      - name: Build Doctor Service Image
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/doctor-service ./services/doctor-service/doctor-service
           docker push ${{ secrets.DOCKER_USERNAME }}/doctor-service
 
-      # -------- PAYMENT --------
-      - name: Build Payment Service
+      # ============================================================
+      # PAYMENT SERVICE
+      # ============================================================
+      - name: Build Payment Service JAR
+        run: |
+          cd services/payment-service
+          chmod +x gradlew
+          ./gradlew build
+
+      - name: Build Payment Service Image
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/payment-service ./services/payment-service
           docker push ${{ secrets.DOCKER_USERNAME }}/payment-service
