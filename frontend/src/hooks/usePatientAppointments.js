@@ -15,22 +15,28 @@ export default function usePatientAppointments() {
         return;
       }
       try {
-        const data = await api.get(`/appointments/patient/${user.userId}`);
+        const [data, doctorsData] = await Promise.all([
+          api.get(`/appointments/patient/${user.userId}`),
+          api.get('/doctors').catch(() => [])
+        ]);
 
-        const mapped = (data || []).map(a => ({
-          id: a.appointmentId || a.id, 
-          patientId: a.patientId,
-          patientName: 'Me', 
-          doctorId: a.doctorId,
-          doctorName: `Doctor #${a.doctorId}`, 
-          specialty: 'Specialist', 
-          date: a.date,
-          time: a.time,
-          status: a.status,
-          type: 'Consultation',
-          fee: 150, 
-          notes: ''
-        }));
+        const mapped = (data || []).map(a => {
+          const doctor = doctorsData.find(d => d.doctorId == a.doctorId || d.id == a.doctorId);
+          return {
+            id: a.appointmentId || a.id, 
+            patientId: a.patientId,
+            patientName: 'Me', 
+            doctorId: a.doctorId,
+            doctorName: (doctor ? doctor.name : (a.doctorName || `Doctor #${a.doctorId}`)), 
+            specialty: (doctor ? doctor.specialization : (a.specialty || 'Specialist')), 
+            date: a.date,
+            time: a.time,
+            status: a.status,
+            type: a.appointmentType || 'Consultation',
+            fee: (doctor && doctor.fee) ? doctor.fee : (a.fee || 150), 
+            notes: a.notes || ''
+          };
+        });
         
         setAppointments(mapped);
       } catch (err) {
