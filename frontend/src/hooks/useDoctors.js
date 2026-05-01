@@ -14,6 +14,7 @@ export default function useDoctors() {
         const mapped = data.map(d => ({
           id: d.doctorId.toString(),
           name: d.name,
+          email: d.email || 'N/A',
           specialty: d.specialization,
           department: d.hospital || 'General',
           experience: '10 yrs', 
