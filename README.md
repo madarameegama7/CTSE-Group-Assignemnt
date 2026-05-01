@@ -7,9 +7,9 @@
 
 The **Online Medical Appointment Booking System** is a cloud-based microservice application that allows:
 
-- 👤 Patients to book and manage doctor appointments
+- 👤 Patients to book, manage appointments and make payments
 - 👨‍⚕️ Doctors to manage availability and view appointments
-- 👨‍💼 Admins to manage doctors and system users
+- 👨‍💼 Admins to manage doctors, users and monitor payments
 
 The system is built using **Spring Boot microservices**, containerized with **Docker**, and deployed on **AWS ECS Fargate** with CI/CD automation.
 
@@ -64,15 +64,14 @@ Core business logic:
 Integrates with:
 - Auth Service (Token validation)
 - Doctor Service (Slot verification)
-- Notification Service (Send confirmation)
+- Payment Service
 
 ---
 
-### 4️⃣ Notification Service
+### 4️⃣ Payment Service
 Handles:
-- Appointment Confirmation Notifications
-- Cancellation Notifications
-- Reminder Alerts
+- Handle Payments
+- Manage Payment Status 
 
 ---
 
@@ -85,8 +84,8 @@ Example Flow (Booking Appointment):
 1. Patient sends booking request
 2. Appointment Service validates JWT via Auth Service
 3. Appointment Service checks slot via Doctor Service
-4. Appointment saved in database
-5. Notification Service sends confirmation
+4. Appointment Service initiates payment via Payment Service
+5. Payment Service processes the payment and returns status
 
 ---
 
@@ -204,7 +203,7 @@ Each team member is responsible for:
 
 ## 📌 Future Improvements
 
-- Payment Integration
+- Payment Gateway Integration
 - SMS Gateway Integration
 - Kubernetes Migration
 - Centralized Logging (ELK Stack)
