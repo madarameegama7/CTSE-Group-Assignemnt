@@ -228,7 +228,7 @@ export default function VerifyPayments() {
                         {formatDate(appt.date || p.paymentDate)}
                       </td>
                       <td style={{ fontWeight: 700, color: "#0F172A" }}>
-                        Rs. ${p.amount}
+                        Rs. {p.amount}
                       </td>
                       <td style={{ textAlign: "right" }}>
                         <button
