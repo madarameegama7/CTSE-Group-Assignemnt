@@ -227,7 +227,7 @@ export default function AdminDoctors() {
                       : <span style={{ color: '#CBD5E1', fontSize: '0.78rem' }}>No ratings yet</span>
                     }
                   </td>
-                  <td style={{ fontWeight: 700, color: '#0F172A' }}>Rs. ${doc.fee}</td>
+                  <td style={{ fontWeight: 700, color: '#0F172A' }}>Rs. {doc.fee}</td>
                   <td>
                     {doc.available
                       ? <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.78rem', color: '#16A34A', fontWeight: 600 }}>
@@ -334,7 +334,7 @@ export default function AdminDoctors() {
                     {errors.experience && <span style={errText}>{errors.experience}</span>}
                   </div>
                   <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label className="form-label">Consultation Fee ($) *</label>
+                    <label className="form-label">Consultation Fee (Rs.) *</label>
                     <input
                       className="form-input"
                       type="number"
