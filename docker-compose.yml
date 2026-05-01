@@ -1,5 +1,6 @@
-services:
+version: "3.8"
 
+services:
   postgres-auth:
     image: postgres:15-alpine
     container_name: postgres-auth
@@ -11,8 +12,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres-auth-data:/var/lib/postgresql/data
-    networks:
-      - ctse_net
+    networks: [ctse_net]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
@@ -30,8 +30,7 @@ services:
       - "5433:5432"
     volumes:
       - postgres-appointment-data:/var/lib/postgresql/data
-    networks:
-      - ctse_net
+    networks: [ctse_net]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
@@ -49,8 +48,7 @@ services:
       - "5434:5432"
     volumes:
       - postgres-doctor-data:/var/lib/postgresql/data
-    networks:
-      - ctse_net
+    networks: [ctse_net]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
@@ -68,26 +66,22 @@ services:
       - "5435:5432"
     volumes:
       - postgres-payment-data:/var/lib/postgresql/data
-    networks:
-      - ctse_net
+    networks: [ctse_net]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  # ── Frontend ───────────────────────────────────
   frontend:
-    image: damithrimeegama/frontend
+    image: damithrimeegama/frontend:${IMAGE_TAG}
     ports:
       - "3000:80"
     restart: unless-stopped
-    networks:
-      - ctse_net
+    networks: [ctse_net]
 
-  # ── API Gateway ────────────────────────────────
   api-gateway:
-    image: damithrimeegama/api-gateway
+    image: damithrimeegama/api-gateway:${IMAGE_TAG}
     ports:
       - "8080:8080"
     restart: unless-stopped
@@ -96,12 +90,10 @@ services:
       - appoinment
       - doctor-service
       - payment-service
-    networks:
-      - ctse_net
+    networks: [ctse_net]
 
-  # ── Auth Service ───────────────────────────────
   auth-service:
-    image: damithrimeegama/auth-service
+    image: damithrimeegama/auth-service:${IMAGE_TAG}
     ports:
       - "8082:8080"
     restart: unless-stopped
@@ -113,13 +105,10 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: 1234
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
-    networks:
-      - ctse_net
+    networks: [ctse_net]
 
-  # ── Appointment Service ────────────────────────
   appoinment:
-    image: damithrimeegama/appointment
+    image: damithrimeegama/appointment:${IMAGE_TAG}
     ports:
       - "8081:8080"
     restart: unless-stopped
@@ -131,13 +120,10 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: 1234
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
-    networks:
-      - ctse_net
+    networks: [ctse_net]
 
-  # ── Doctor Service ─────────────────────────────
   doctor-service:
-    image: damithrimeegama/doctor-service
+    image: damithrimeegama/doctor-service:${IMAGE_TAG}
     ports:
       - "8083:8080"
     restart: unless-stopped
@@ -149,13 +135,10 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: 1234
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
-    networks:
-      - ctse_net
+    networks: [ctse_net]
 
-  # ── Payment Service ────────────────────────────
   payment-service:
-    image: damithrimeegama/payment-service
+    image: damithrimeegama/payment-service:${IMAGE_TAG}
     ports:
       - "8084:8080"
     restart: unless-stopped
@@ -167,9 +150,7 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: 1234
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
-    networks:
-      - ctse_net
+    networks: [ctse_net]
 
 networks:
   ctse_net:
