@@ -19,9 +19,6 @@ const NAV = [
   { to: "/admin/doctors", icon: UserCheck, label: "Doctors" },
   { to: "/admin/appointments", icon: CalendarDays, label: "Appointments" },
   { to: "/admin/verify-payments", icon: DollarSign, label: "Payments" },
-  { to: "/admin/reports", icon: BarChart2, label: "Reports" },
-  { type: "section", label: "System" },
-  { to: "/admin/settings", icon: Settings, label: "Settings" },
 ];
 
 const PAGE_TITLES = {
