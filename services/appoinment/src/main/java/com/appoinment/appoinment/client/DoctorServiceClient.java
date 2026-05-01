@@ -19,7 +19,7 @@ public class DoctorServiceClient {
 
     private final WebClient webClient;
 
-    @Value("${doctor.service.url:http://localhost:8080/api/doctors}")
+    @Value("${doctor.service.url:http://16.16.115.241:8080/api/doctors}")
     private String doctorServiceUrl;
 
     public Mono<SlotDTO> getSlot(Long doctorId, Long slotId) {
