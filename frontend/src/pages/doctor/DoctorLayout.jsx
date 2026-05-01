@@ -11,7 +11,6 @@ const NAV = [
   { to:'/doctor/schedule',     icon:Clock,           label:'My Schedule'    },
   { type:'section', label:'Account' },
   { to:'/doctor/profile',      icon:User,            label:'Profile'        },
-  { to:'/doctor/settings',     icon:Settings,        label:'Settings'       },
 ];
 
 const PAGE_TITLES = {
@@ -19,6 +18,7 @@ const PAGE_TITLES = {
   '/doctor/appointments': { title:'Appointments',  sub:'Manage patient bookings' },
   '/doctor/patients':     { title:'My Patients',   sub:'Patient directory' },
   '/doctor/schedule':     { title:'My Schedule',   sub:'Manage availability' },
+  '/doctor/profile':      { title:'Profile',       sub:'Manage your information' },
 };
 
 export default function DoctorLayout() {
