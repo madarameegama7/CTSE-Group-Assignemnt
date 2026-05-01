@@ -50,17 +50,32 @@ export default function VerifyPayments() {
     const fetchAllPayments = async () => {
       try {
         const data = await api.get("/payments");
-        const mapped = (data || []).map((p) => ({
-          id: p.paymentId,
-          paymentId: p.paymentId,
-          appointmentId: p.appointmentId,
-          patientId: p.patientId,
-          patientName: p.patientName || "",
-          amount: p.amount,
-          status: p.status,
-          transactionId: p.transactionId || `TXN-${Date.now()}`,
-          paymentDate: p.paymentDate || new Date().toISOString().split("T")[0],
-          paymentType: p.paymentType || "Online",
+
+        // Normalize possible response shapes
+        let list = [];
+        if (Array.isArray(data)) list = data;
+        else if (data && Array.isArray(data.payments)) list = data.payments;
+        else if (data && Array.isArray(data.data)) list = data.data;
+        else if (data && Array.isArray(data.rows)) list = data.rows;
+
+        const mapped = (list || []).map((p, idx) => ({
+          id: p.paymentId || p.payment_id || p.id || p._id || `p_${idx}`,
+          paymentId: p.paymentId || p.payment_id || p.id || p._id || `p_${idx}`,
+          appointmentId:
+            p.appointmentId || p.appointment_id || p.appointment || null,
+          patientId:
+            p.patientId || p.patient_id || p.userId || p.user_id || null,
+          patientName: p.patientName || p.patient_name || "",
+          amount: p.amount || p.fee || 0,
+          status: p.status || p.payment_status || p.paymentStatus || "PENDING",
+          transactionId:
+            p.transactionId ||
+            p.txn ||
+            p.transaction_id ||
+            `TXN-${p.payment_id || p.paymentId || p.id || idx}-${Date.now()}`,
+          paymentDate: p.paymentDate || p.payment_date || p.date || null,
+          paymentType:
+            p.paymentType || p.payment_method || p.method || p.type || "Online",
         }));
         setRawPayments(mapped);
       } catch (err) {
