@@ -9,12 +9,17 @@ export default function useAppointments() {
   useEffect(() => {
     async function fetchAppointments() {
       try {
-        const data = await api.get('/appointments');
+        const [data, usersData] = await Promise.all([
+          api.get('/appointments'),
+          api.get('/auth/users').catch(() => [])
+        ]);
         
-        const mapped = (data || []).map(a => ({
-          id: a.appointmentId || a.id,
-          patientId: a.patientId,
-          patientName: a.patientName || 'Unknown Patient',
+        const mapped = (data || []).map(a => {
+          const user = usersData.find(u => u.userId == a.patientId || u.id == a.patientId);
+          return {
+            id: a.appointmentId || a.id,
+            patientId: a.patientId,
+            patientName: a.patientName || (user ? user.name : 'Unknown Patient'),
           doctorId: a.doctorId,
           doctorName: a.doctorName || `Doctor #${a.doctorId}`,
           specialty: a.specialty || 'Specialist',
@@ -23,8 +28,9 @@ export default function useAppointments() {
           status: a.status,
           type: a.appointmentType || 'Consultation',
           fee: a.fee || 150,
-          notes: a.notes || ''
-        }));
+            notes: a.notes || ''
+          };
+        });
         
         setAppointments(mapped);
       } catch (err) {
