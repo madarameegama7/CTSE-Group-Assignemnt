@@ -78,9 +78,7 @@ services:
 
   # ── Frontend ───────────────────────────────────
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    image: damithrimeegama/frontend
     ports:
       - "3000:80"
     restart: unless-stopped
@@ -89,9 +87,7 @@ services:
 
   # ── API Gateway ────────────────────────────────
   api-gateway:
-    build:
-      context: ./services/api-gateway/api-gateway
-      dockerfile: Dockerfile
+    image: damithrimeegama/api-gateway
     ports:
       - "8080:8080"
     restart: unless-stopped
@@ -105,9 +101,7 @@ services:
 
   # ── Auth Service ───────────────────────────────
   auth-service:
-    build:
-      context: ./services/auth-service/auth-service
-      dockerfile: Dockerfile
+    image: damithrimeegama/auth-service
     ports:
       - "8082:8080"
     restart: unless-stopped
@@ -124,9 +118,7 @@ services:
 
   # ── Appointment Service ────────────────────────
   appoinment:
-    build:
-      context: ./services/appoinment
-      dockerfile: Dockerfile
+    image: damithrimeegama/appointment
     ports:
       - "8081:8080"
     restart: unless-stopped
@@ -143,9 +135,7 @@ services:
 
   # ── Doctor Service ─────────────────────────────
   doctor-service:
-    build:
-      context: ./services/doctor-service/doctor-service
-      dockerfile: Dockerfile
+    image: damithrimeegama/doctor-service
     ports:
       - "8083:8080"
     restart: unless-stopped
@@ -162,9 +152,7 @@ services:
 
   # ── Payment Service ────────────────────────────
   payment-service:
-    build:
-      context: ./services/payment-service
-      dockerfile: Dockerfile
+    image: damithrimeegama/payment-service
     ports:
       - "8084:8080"
     restart: unless-stopped
