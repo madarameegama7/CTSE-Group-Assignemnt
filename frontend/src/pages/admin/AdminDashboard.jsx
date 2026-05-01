@@ -1,5 +1,6 @@
 import useAppointments from '../../hooks/useAppointments';
 import useDoctors from '../../hooks/useDoctors';
+import useAllUsers from '../../hooks/useAllUsers';
 import { Users, UserCheck, CalendarDays, DollarSign, TrendingUp, Activity } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 
@@ -30,14 +31,16 @@ const badge = s => {
 export default function AdminDashboard() {
   const { appointments } = useAppointments();
   const { doctors } = useDoctors();
+  const { users } = useAllUsers();
   
   const totalRevenue = appointments.reduce((s,a)=>s+(a.fee||0),0);
+  const patientCount = users ? users.filter(u => u.role === 'PATIENT').length : 0;
 
   const stats = [
-    { label:'Total Patients', value:'2,847', change:'+15.2%', icon:Users,       color:'#2563EB', bg:'#EFF6FF' },
+    { label:'Total Patients', value:patientCount, change:'+15.2%', icon:Users,       color:'#2563EB', bg:'#EFF6FF' },
     { label:'Active Doctors', value:doctors.length,     change:'+2',     icon:UserCheck,  color:'#0D9488', bg:'#F0FDFA' },
     { label:'Appointments',   value:appointments.length, change:'+8.7%',  icon:CalendarDays,color:'#7C3AED', bg:'#F5F3FF' },
-    { label:'Revenue (Mo.)',  value:`Rs. ${(totalRevenue*12).toLocaleString()}`, change:'+12.4%', icon:DollarSign, color:'#D97706', bg:'#FFFBEB' },
+    { label:'Total Revenue',  value:`Rs. ${totalRevenue.toLocaleString()}`, change:'+12.4%', icon:DollarSign, color:'#D97706', bg:'#FFFBEB' },
   ];
 
   return (
