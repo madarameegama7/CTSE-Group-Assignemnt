@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import useDoctors from '../../hooks/useDoctors';
 import useDoctorSlots from '../../hooks/useDoctorSlots';
+import useAllUsers from '../../hooks/useAllUsers';
 import { api } from '../../services/api';
 import { Search, Plus, Star, MoreHorizontal, CheckCircle2, XCircle, X, Clock, Trash2 } from 'lucide-react';
 
@@ -10,6 +11,7 @@ const EMPTY_FORM   = { name:'', email:'', password:'', specialty:'Cardiologist',
 
 export default function AdminDoctors() {
   const { doctors: doctorsData } = useDoctors();
+  const { users: usersData } = useAllUsers();
   const [doctors, setDoctors]   = useState([]);
   const [search, setSearch]     = useState('');
   const [filter, setFilter]     = useState('All');
@@ -26,8 +28,33 @@ export default function AdminDoctors() {
   const [slotErrors, setSlotErrors] = useState({});
 
   useEffect(() => {
-    setDoctors(doctorsData);
-  }, [doctorsData]);
+    const combined = [...doctorsData];
+    if (usersData && usersData.length > 0) {
+      usersData.filter(u => u.role === 'DOCTOR').forEach(userDoc => {
+        const exists = combined.find(d => 
+          (d.email && d.email !== 'N/A' && userDoc.email && userDoc.email !== 'N/A' && d.email.toLowerCase() === userDoc.email.toLowerCase()) || 
+          d.name.toLowerCase() === userDoc.name.toLowerCase()
+        );
+        if (!exists) {
+          combined.push({
+            id: 'usr_' + userDoc.id,
+            name: userDoc.name,
+            email: userDoc.email || 'N/A',
+            specialty: 'General',
+            department: 'General',
+            experience: 'Unknown',
+            fee: 150,
+            available: true,
+            rating: 0,
+            reviews: 0,
+            avatar: userDoc.name.split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase(),
+            nextSlot: 'Not set'
+          });
+        }
+      });
+    }
+    setDoctors(combined);
+  }, [doctorsData, usersData]);
 
   const DEPTS = ['All', ...new Set(doctors.map(d => d.department))];
 
