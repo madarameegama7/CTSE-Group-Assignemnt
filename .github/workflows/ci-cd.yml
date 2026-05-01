@@ -1,0 +1,76 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ---------------- CHECKOUT ----------------
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # ---------------- DEBUG ----------------
+      - name: Show project structure
+        run: ls -R
+
+      # ---------------- LOGIN DOCKER ----------------
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      # ============================================================
+      # FRONTEND
+      # ============================================================
+      - name: Build Frontend Image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/frontend ./frontend
+          docker push ${{ secrets.DOCKER_USERNAME }}/frontend
+
+      # ============================================================
+      # API GATEWAY (Gradle)
+      # ============================================================
+      - name: Build API Gateway JAR
+        run: |
+          cd services/api-gateway/api-gateway
+          chmod +x gradlew
+          ./gradlew build
+
+      - name: Build API Gateway Image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/api-gateway ./services/api-gateway/api-gateway
+          docker push ${{ secrets.DOCKER_USERNAME }}/api-gateway
+
+      # ============================================================
+      # AUTH SERVICE (Maven - Docker handles build)
+      # ============================================================
+      - name: Build Auth Service Image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/auth-service ./services/auth-service/auth-service
+          docker push ${{ secrets.DOCKER_USERNAME }}/auth-service
+
+      # ============================================================
+      # APPOINTMENT SERVICE (Maven)
+      # ============================================================
+      - name: Build Appointment Service Image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/appointment ./services/appoinment
+          docker push ${{ secrets.DOCKER_USERNAME }}/appointment
+
+      # ============================================================
+      # DOCTOR SERVICE (Maven)
+      # ============================================================
+      - name: Build Doctor Service Image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/doctor-service ./services/doctor-service/doctor-service
+          docker push ${{ secrets.DOCKER_USERNAME }}/doctor-service
+
+      # ============================================================
+      # PAYMENT SERVICE (Maven)
+      # ============================================================
+      - name: Build Payment Service Image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/payment-service ./services/payment-service
+          docker push ${{ secrets.DOCKER_USERNAME }}/payment-service
