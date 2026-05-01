@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import useAllUsers from '../../hooks/useAllUsers';
+import useDoctors from '../../hooks/useDoctors';
 import { api } from '../../services/api';
 import { Search, Plus, MoreHorizontal, UserCheck, Users, Shield, X } from 'lucide-react';
 
@@ -20,6 +21,7 @@ const EMPTY_FORM = { name: '', email: '', role: 'PATIENT', status: 'ACTIVE', pas
 
 export default function AdminUsers() {
   const { users: usersData } = useAllUsers();
+  const { doctors: doctorsData } = useDoctors();
   const [users, setUsers]       = useState([]);
   const [search, setSearch]     = useState('');
   const [roleTab, setRoleTab]   = useState('All');
@@ -30,8 +32,27 @@ export default function AdminUsers() {
   const [successMsg, setSuccessMsg] = useState('');
 
   useEffect(() => {
-    setUsers(usersData);
-  }, [usersData]);
+    const combined = [...usersData];
+    if (doctorsData && doctorsData.length > 0) {
+      doctorsData.forEach(doc => {
+        const exists = combined.find(u => 
+          (u.email && u.email !== 'N/A' && doc.email && doc.email !== 'N/A' && u.email.toLowerCase() === doc.email.toLowerCase()) || 
+          u.name.toLowerCase() === doc.name.toLowerCase()
+        );
+        if (!exists) {
+          combined.push({
+            id: 'doc_' + doc.id,
+            name: doc.name,
+            email: doc.email || 'N/A',
+            role: 'DOCTOR',
+            status: 'ACTIVE',
+            joined: 'Unknown'
+          });
+        }
+      });
+    }
+    setUsers(combined);
+  }, [usersData, doctorsData]);
 
   const filtered = users.filter(u => {
     const mr = roleTab === 'All' || u.role === roleTab;
