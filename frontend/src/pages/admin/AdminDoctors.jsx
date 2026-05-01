@@ -76,7 +76,8 @@ export default function AdminDoctors() {
         specialization: form.specialty,
         hospital: form.department,
         email: form.email.trim(),
-        phone: ''
+        phone: '',
+        fee: Number(form.fee)
       };
       
       const res = await api.post('/doctors', payload);

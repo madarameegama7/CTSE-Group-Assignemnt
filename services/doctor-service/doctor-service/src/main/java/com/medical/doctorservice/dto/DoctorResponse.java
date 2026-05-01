@@ -6,13 +6,14 @@ import lombok.Data;
 public class DoctorResponse {
     public DoctorResponse() {}
 
-    public DoctorResponse(Long doctorId, String name, String specialization, String hospital, String phone, String email) {
+    public DoctorResponse(Long doctorId, String name, String specialization, String hospital, String phone, String email, Double fee) {
         this.doctorId = doctorId;
         this.name = name;
         this.specialization = specialization;
         this.hospital = hospital;
         this.phone = phone;
         this.email = email;
+        this.fee = fee;
     }
 
     private Long doctorId;
@@ -21,4 +22,5 @@ public class DoctorResponse {
     private String hospital;
     private String phone;
     private String email;
+    private Double fee;
 }
