@@ -91,7 +91,6 @@ function App() {
             <Route path="doctors" element={<AdminDoctors />} />
             <Route path="appointments" element={<AdminAppointments />} />
             <Route path="verify-payments" element={<VerifyPayments />} />
-            <Route path="reports" element={<AdminReports />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />
