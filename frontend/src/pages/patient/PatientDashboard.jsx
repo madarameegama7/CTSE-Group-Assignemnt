@@ -33,7 +33,7 @@ export default function PatientDashboard() {
     <div>
       <div style={banner}>
         <div>
-          <h2 style={bannerTitle}>Good morning, {user?.name?.split(' ')[0]} 👋</h2>
+          <h2 style={bannerTitle}>Good Afternoon, {user?.name?.split(' ')[0]} 👋</h2>
           <p style={bannerSub}>You have <strong>{upcoming.length} upcoming</strong> appointment{upcoming.length !== 1 ? 's' : ''} scheduled.</p>
         </div>
         <button className="btn btn-primary" style={{ gap: 6 }} onClick={() => navigate('/patient/find-doctors')}>
@@ -102,7 +102,7 @@ export default function PatientDashboard() {
             <span className="card-title">Recent History</span>
           </div>
           <div className="card-body" style={{ padding: '0 0 8px' }}>
-            {loading ? <p style={{padding: '12px 20px', color: '#64748B', fontSize: '0.85rem'}}>Loading...</p> : myAppts.slice(0, 4).map(a => (
+            {loading ? <p style={{ padding: '12px 20px', color: '#64748B', fontSize: '0.85rem' }}>Loading...</p> : myAppts.slice(0, 4).map(a => (
               <div key={a.id} style={historyItem}>
                 <div className="doc-avatar" style={{ background: '#F1F5F9', color: '#475569' }}>
                   {(a.doctorName || 'DR').split(' ').map(w => w[0]).join('').slice(0, 2)}

@@ -19,18 +19,18 @@ const NAV = [
 ];
 
 const PAGE_TITLES = {
-  '/patient/dashboard':    { title:'Dashboard',         sub:'Welcome back, Sarah' },
-  '/patient/appointments': { title:'My Appointments',   sub:'View and manage your bookings' },
-  '/patient/find-doctors': { title:'Find Doctors',      sub:'Search and book specialists' },
-  '/patient/records':      { title:'Medical Records',   sub:'Your health history' },
-  '/patient/payments':     { title:'My Payments',       sub:'Manage your billing and payments' },
-  '/patient/profile':      { title:'Profile',           sub:'Manage your personal info' },
+  '/patient/dashboard':    { title:'Dashboard' },
+  '/patient/appointments': { title:'My Appointments' },
+  '/patient/find-doctors': { title:'Find Doctors' },
+  '/patient/records':      { title:'Medical Records' },
+  '/patient/payments':     { title:'My Payments' },
+  '/patient/profile':      { title:'Profile' },
 };
 
 export default function PatientLayout() {
   const [open, setOpen] = useState(false);
   const pathname = window.location.pathname;
-  const meta = PAGE_TITLES[pathname] || { title:'MediBook', sub:'' };
+  const meta = PAGE_TITLES[pathname] || { title:'MediBook' };
 
   return (
     <div className="shell">
@@ -47,7 +47,6 @@ export default function PatientLayout() {
             </button>
             <div>
               <div className="topbar-title">{meta.title}</div>
-              {meta.sub && <div className="topbar-sub">{meta.sub}</div>}
             </div>
           </div>
           <div className="topbar-right">
