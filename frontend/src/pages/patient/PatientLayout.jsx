@@ -13,9 +13,9 @@ const NAV = [
   { to:'/patient/appointments', icon:CalendarDays,    label:'My Appointments' },
   { to:'/patient/find-doctors', icon:Search,          label:'Find Doctors'    },
   { to:'/patient/records',      icon:FileText,        label:'Medical Records' },
+  { to:'/patient/payments',     icon:CreditCard,      label:'My Payments'     },
   { type:'section', label:'Account' },
   { to:'/patient/profile',      icon:User,            label:'Profile'         },
-  { to:'/patient/settings',     icon:Settings,        label:'Settings'        },
 ];
 
 const PAGE_TITLES = {
@@ -23,6 +23,7 @@ const PAGE_TITLES = {
   '/patient/appointments': { title:'My Appointments',   sub:'View and manage your bookings' },
   '/patient/find-doctors': { title:'Find Doctors',      sub:'Search and book specialists' },
   '/patient/records':      { title:'Medical Records',   sub:'Your health history' },
+  '/patient/payments':     { title:'My Payments',       sub:'Manage your billing and payments' },
   '/patient/profile':      { title:'Profile',           sub:'Manage your personal info' },
 };
 
