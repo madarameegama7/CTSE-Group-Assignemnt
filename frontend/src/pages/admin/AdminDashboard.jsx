@@ -127,7 +127,7 @@ export default function AdminDashboard() {
                   <td style={{ color:'#64748B' }}>{a.date}</td>
                   <td><span className="badge badge-slate">{a.type}</span></td>
                   <td>{badge(a.status)}</td>
-                  <td style={{ fontWeight:700 }}>Rs. ${a.fee}</td>
+                  <td style={{ fontWeight:700 }}>Rs. {a.fee}</td>
                 </tr>
               ))}
             </tbody>
