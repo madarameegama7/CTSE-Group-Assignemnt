@@ -1,12 +1,18 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/Authcontext';
-import { Activity, Shield, Heart, Stethoscope } from 'lucide-react';
+import { Activity, Shield, Heart, Stethoscope, Eye, EyeOff } from 'lucide-react';
+
+const ACCOUNT_TYPES = [
+  { role:'PATIENT', icon:Heart,       color:'#2563EB', label:'Patient',  desc:'Book & manage appointments' },
+  { role:'DOCTOR',  icon:Stethoscope, color:'#0D9488', label:'Doctor',   desc:'Manage schedule & patients'  },
+];
 
 export default function Register() {
   const [formData, setFormData] = useState({
     name: '', email: '', password: '', phone: '', address: '', role: 'PATIENT'
   });
+  const [showPw, setShowPw] = useState(false);
   const { register, loading, error } = useAuth();
   const navigate = useNavigate();
 
@@ -49,6 +55,35 @@ export default function Register() {
           </div>
 
           <form onSubmit={handleSubmit} style={styles.form}>
+            <div style={styles.fieldGroup}>
+              <label style={styles.label}>Role</label>
+              <div style={styles.tileRow}>
+                {ACCOUNT_TYPES.map(acc => {
+                  const Icon = acc.icon;
+                  const active = formData.role === acc.role;
+                  return (
+                    <button
+                      type="button"
+                      key={acc.role}
+                      onClick={() => setFormData({ ...formData, role: acc.role })}
+                      style={{
+                        ...styles.tile,
+                        borderColor: active ? acc.color : '#E2E8F0',
+                        background:  active ? `${acc.color}0D` : '#fff',
+                        boxShadow:   active ? `0 0 0 2px ${acc.color}33` : 'none',
+                      }}
+                    >
+                      <div style={{ ...styles.tileIcon, background: active ? `${acc.color}20` : '#F1F5F9', color: active ? acc.color : '#94A3B8' }}>
+                        <Icon size={17} />
+                      </div>
+                      <span style={{ ...styles.tileLabel, color: active ? acc.color : '#334155' }}>{acc.label}</span>
+                      <span style={styles.tileDesc}>{acc.desc}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
               <div style={styles.fieldGroup}>
                 <label style={styles.label}>Full Name</label>
@@ -70,17 +105,24 @@ export default function Register() {
               <input style={styles.input} name="address" value={formData.address} onChange={handleChange} placeholder="City, Country" required />
             </div>
 
-            <div style={styles.fieldGroup}>
-              <label style={styles.label}>Role</label>
-              <select style={styles.input} name="role" value={formData.role} onChange={handleChange}>
-                <option value="PATIENT">Patient</option>
-                <option value="DOCTOR">Doctor</option>
-              </select>
-            </div>
+
 
             <div style={styles.fieldGroup}>
               <label style={styles.label}>Password</label>
-              <input style={styles.input} type="password" name="password" value={formData.password} onChange={handleChange} placeholder="Must be at least 8 characters" required />
+              <div style={styles.pwWrap}>
+                <input
+                  style={{ ...styles.input, paddingRight:'44px' }}
+                  type={showPw ? 'text' : 'password'}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Must be at least 8 characters"
+                  required
+                />
+                <button type="button" style={styles.eyeBtn} onClick={() => setShowPw(p => !p)}>
+                  {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
+                </button>
+              </div>
             </div>
 
             {error && (
@@ -134,6 +176,16 @@ const styles = {
   formTitle:  { fontFamily:"'Lexend',sans-serif", fontSize:'1.4rem', fontWeight:700, color:'#0F172A', letterSpacing:'-0.02em', marginBottom:4 },
   formSub:    { fontSize:'0.85rem', color:'#64748B' },
 
+  tileRow: { display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:10 },
+  tile: {
+    display:'flex', flexDirection:'column', alignItems:'center', gap:6,
+    padding:'14px 8px', borderRadius:12, border:'1.5px solid #E2E8F0',
+    cursor:'pointer', transition:'all 0.18s ease', background:'white', textAlign:'center',
+  },
+  tileIcon:  { width:38, height:38, borderRadius:10, display:'flex', alignItems:'center', justifyContent:'center', transition:'all 0.18s ease' },
+  tileLabel: { fontSize:'0.8rem', fontWeight:700, transition:'color 0.18s ease' },
+  tileDesc:  { fontSize:'0.68rem', color:'#94A3B8', lineHeight:1.3 },
+
   form: { display:'flex', flexDirection:'column', gap:14 },
 
   fieldGroup: { display:'flex', flexDirection:'column', gap:5 },
@@ -144,6 +196,9 @@ const styles = {
     transition:'border-color 0.18s, box-shadow 0.18s', fontFamily:'inherit',
     boxSizing:'border-box',
   },
+
+  pwWrap: { position:'relative' },
+  eyeBtn: { position:'absolute', right:12, top:'50%', transform:'translateY(-50%)', background:'none', border:'none', cursor:'pointer', color:'#94A3B8', display:'flex', alignItems:'center' },
 
   errorBox: { background:'#FEF2F2', border:'1px solid #FECACA', color:'#B91C1C', borderRadius:8, padding:'9px 13px', fontSize:'0.82rem' },
 

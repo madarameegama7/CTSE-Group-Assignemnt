@@ -192,7 +192,7 @@ export default function VerifyPayments() {
                       <td style={{ color: '#64748B' }}>
                         {appt.date ? `${appt.date} • ${appt.time}` : p.paymentDate}
                       </td>
-                      <td style={{ fontWeight: 700, color: '#0F172A' }}>${p.amount}</td>
+                      <td style={{ fontWeight: 700, color: '#0F172A' }}>Rs. ${p.amount}</td>
                       <td>{badgeClass(p.status)}</td>
                       <td style={{ textAlign: 'right' }}>
                         <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>

@@ -22,6 +22,10 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
+    public java.util.List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
     @Transactional
     public AuthResponse register(RegisterRequest request) {
         if (!request.getPassword().matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&]).{8,}$")) {

@@ -74,9 +74,9 @@ export default function AdminReports() {
                 <YAxis
                   tick={{ fontSize: 11, fill: '#94A3B8' }}
                   axisLine={false} tickLine={false}
-                  tickFormatter={v => `$${(v / 1000).toFixed(0)}k`}
+                  tickFormatter={v => `Rs. ${(v / 1000).toFixed(0)}k`}
                 />
-                <Tooltip contentStyle={tooltipStyle} formatter={v => [`$${v.toLocaleString()}`, 'Revenue']} />
+                <Tooltip contentStyle={tooltipStyle} formatter={v => [`Rs. ${v.toLocaleString()}`, 'Revenue']} />
                 <Line type="monotone" dataKey="revenue" stroke="#0D9488" strokeWidth={2.5} dot={{ fill: '#0D9488', r: 4 }} activeDot={{ r: 6 }} />
               </LineChart>
             </ResponsiveContainer>
@@ -130,7 +130,7 @@ export default function AdminReports() {
                   <td style={{ color: '#64748B' }}>{doc.specialty}</td>
                   <td style={{ fontWeight: 700, color: '#D97706' }}>⭐ {doc.rating}</td>
                   <td style={{ color: '#64748B' }}>{doc.reviews}</td>
-                  <td style={{ fontWeight: 700 }}>${(doc.fee * doc.reviews * 0.6).toLocaleString()}</td>
+                  <td style={{ fontWeight: 700 }}>Rs. ${(doc.fee * doc.reviews * 0.6).toLocaleString()}</td>
                 </tr>
               ))}
             </tbody>

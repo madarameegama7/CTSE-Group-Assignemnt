@@ -79,12 +79,6 @@ export default function FindDoctors() {
             time: selSlot.time + ":00"
         });
         
-        await api.post('/payments', {
-            appointmentId: apptData.id || apptData.appointmentId,
-            amount: parseFloat(booking.fee),
-            paymentMethod: "CARD"
-        });
-        
         setStep(3);
       } catch (err) {
         setErrorMsg(err.message);
@@ -133,7 +127,7 @@ export default function FindDoctors() {
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', borderTop:'1px solid #F1F5F9', paddingTop:12 }}>
                 <div>
                   <div style={{ fontSize:'0.78rem', color:'#94A3B8' }}>Consultation fee</div>
-                  <div style={{ fontWeight:700, fontSize:'1rem', color:'#0F172A' }}>${doc.fee}</div>
+                  <div style={{ fontWeight:700, fontSize:'1rem', color:'#0F172A' }}>Rs. ${doc.fee}</div>
                 </div>
                 <div style={{ textAlign:'right' }}>
                   <div style={{ fontSize:'0.72rem', color:'#94A3B8', marginBottom:2 }}>Availability</div>
@@ -213,7 +207,7 @@ export default function FindDoctors() {
                   <div style={confirmRow}><span>Date</span><strong>{selDate}</strong></div>
                   <div style={confirmRow}><span>Time</span><strong>{selSlot?.time}</strong></div>
                   <div style={confirmRow}><span>Type</span><strong>{apptType}</strong></div>
-                  <div style={confirmRow}><span>Fee</span><strong>${booking.fee}</strong></div>
+                  <div style={confirmRow}><span>Fee</span><strong>Rs. ${booking.fee}</strong></div>
                   {errorMsg && <div style={{ color:'#EF4444', fontSize:'0.85rem', textAlign:'center', marginTop:10, padding:'8px', background:'#FEF2F2', borderRadius:'6px' }}>{errorMsg}</div>}
                 </div>
               )}
@@ -238,7 +232,7 @@ export default function FindDoctors() {
                   {step===1 ? 'Cancel' : 'Back'}
                 </button>
                 <button className="btn btn-primary" onClick={handleBook} disabled={(step===1&&!selSlot) || isProcessing}>
-                  {isProcessing ? 'Processing...' : (step===1 ? 'Continue' : 'Confirm & Pay')}
+                  {isProcessing ? 'Processing...' : (step===1 ? 'Continue' : 'Confirm Booking')}
                 </button>
               </div>
             )}

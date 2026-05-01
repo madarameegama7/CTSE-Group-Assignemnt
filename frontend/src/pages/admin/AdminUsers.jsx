@@ -56,22 +56,55 @@ export default function AdminUsers() {
     const e2 = validate();
     if (Object.keys(e2).length) { setErrors(e2); return; }
     setSaving(true);
-    await new Promise(r => setTimeout(r, 800)); 
-    const newUser = {
-      id:     'u' + Date.now(),
-      name:   form.name.trim(),
-      email:  form.email.trim(),
-      role:   form.role,
-      status: form.status,
-      joined: new Date().toISOString().slice(0, 10),
-    };
-    setUsers(prev => [newUser, ...prev]);
-    setSaving(false);
-    setShowModal(false);
-    setForm(EMPTY_FORM);
-    setErrors({});
-    setSuccessMsg(`User "${newUser.name}" added successfully!`);
-    setTimeout(() => setSuccessMsg(''), 3000);
+    try {
+      const payload = {
+        name: form.name.trim(),
+        email: form.email.trim(),
+        password: form.password,
+        role: form.role,
+        address: "Hospital",
+        phone: ""
+      };
+      
+      const res = await api.post('/auth/register', payload);
+
+      const newUser = {
+        id:     res.userId ? res.userId.toString() : 'u' + Date.now(),
+        name:   form.name.trim(),
+        email:  form.email.trim(),
+        role:   form.role,
+        status: form.status,
+        joined: new Date().toISOString().slice(0, 10),
+      };
+      // If the admin is creating a DOCTOR from the general User Tab, 
+      // automatically provision a default Medical Profile in the Doctor microservice!
+      if (form.role === 'DOCTOR') {
+        try {
+          const docPayload = {
+            name: form.name.trim(),
+            specialization: 'General',
+            hospital: 'System Default',
+            email: form.email.trim(),
+            phone: ''
+          };
+          await api.post('/doctors', docPayload);
+        } catch (doctorErr) {
+          console.error("Warning: Could not provision default doctor profile", doctorErr);
+        }
+      }
+
+      setUsers(prev => [newUser, ...prev]);
+      setShowModal(false);
+      setForm(EMPTY_FORM);
+      setErrors({});
+      setSuccessMsg(`User "${newUser.name}" added successfully!`);
+      setTimeout(() => setSuccessMsg(''), 3000);
+    } catch (error) {
+      console.error('Error adding user:', error);
+      setErrors({ submit: error.message || 'Failed to add user' });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const closeModal = () => { setShowModal(false); setForm(EMPTY_FORM); setErrors({}); };
@@ -236,9 +269,12 @@ export default function AdminUsers() {
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-outline" onClick={closeModal}>Cancel</button>
-                <button type="submit" className="btn btn-primary" disabled={saving}>
-                  {saving ? <span className="spinner" /> : <><Plus size={14} /> Add User</>}
-                </button>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '5px' }}>
+                  <button type="submit" className="btn btn-primary" disabled={saving}>
+                    {saving ? <span className="spinner" /> : <><Plus size={14} /> Add User</>}
+                  </button>
+                  {errors.submit && <span style={errText}>{errors.submit}</span>}
+                </div>
               </div>
             </form>
           </div>
