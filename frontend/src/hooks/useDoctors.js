@@ -19,7 +19,7 @@ export default function useDoctors() {
           experience: '10 yrs', 
           rating: 4.8, 
           reviews: 120, 
-          fee: 150, 
+          fee: d.fee || 150, 
           avatar: d.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(),
           available: true,
           nextSlot: 'View Calendar' 

@@ -29,4 +29,5 @@ public class Doctor {
 
     private String phone;
     private String email;
+    private Double fee;
 }
