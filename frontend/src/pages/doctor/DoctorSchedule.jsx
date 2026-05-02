@@ -20,8 +20,13 @@ export default function DoctorSchedule() {
   const [slots, setSlots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
+  
+  // New slot form state
+  const [newDate, setNewDate] = useState('');
+  const [newStartTime, setNewStartTime] = useState('');
+  const [newEndTime, setNewEndTime] = useState('');
+  const [adding, setAdding] = useState(false);
 
-  useEffect(() => {
     const fetchSlots = async () => {
       try {
         const data = await api.get(`/doctors/${user?.userId}/slots`);
@@ -39,6 +44,8 @@ export default function DoctorSchedule() {
         setLoading(false);
       }
     };
+
+  useEffect(() => {
     if (user?.userId) {
       fetchSlots();
     }
@@ -50,6 +57,30 @@ export default function DoctorSchedule() {
   const toggleSlot = id => setSlots(s => s.map(sl => sl.id===id ? { ...sl, available:!sl.available } : sl));
 
   const handleSave = () => { setSaved(true); setTimeout(()=>setSaved(false), 2000); };
+
+  const handleAddSlot = async () => {
+    if (!newDate || !newStartTime || !newEndTime) {
+      alert('Please select date, start time, and end time.');
+      return;
+    }
+    setAdding(true);
+    try {
+      await api.post(`/doctors/${user?.userId}/slots`, {
+        date: newDate,
+        startTime: newStartTime + ':00',
+        endTime: newEndTime + ':00'
+      });
+      setNewDate('');
+      setNewStartTime('');
+      setNewEndTime('');
+      fetchSlots(); // Refresh slots after adding
+    } catch (err) {
+      console.error(err);
+      alert('Failed to add slot');
+    } finally {
+      setAdding(false);
+    }
+  };
 
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:20 }}>
@@ -95,7 +126,32 @@ export default function DoctorSchedule() {
 
       <div className="card fade-up">
         <div className="card-header">
-          <span className="card-title">Today's Slot Availability</span>
+          <span className="card-title">Add Availability Slot</span>
+        </div>
+        <div className="card-body">
+          <div style={{ display: 'flex', gap: 15, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={{ fontSize: '0.8rem', color: '#64748B', fontWeight: 600 }}>Date</label>
+              <input type="date" value={newDate} onChange={e => setNewDate(e.target.value)} style={timeInput} min={new Date().toISOString().split('T')[0]} />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={{ fontSize: '0.8rem', color: '#64748B', fontWeight: 600 }}>Start Time</label>
+              <input type="time" value={newStartTime} onChange={e => setNewStartTime(e.target.value)} style={timeInput} />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={{ fontSize: '0.8rem', color: '#64748B', fontWeight: 600 }}>End Time</label>
+              <input type="time" value={newEndTime} onChange={e => setNewEndTime(e.target.value)} style={timeInput} />
+            </div>
+            <button className="btn btn-primary" onClick={handleAddSlot} disabled={adding} style={{ height: 38 }}>
+              {adding ? 'Adding...' : 'Add Slot'}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="card fade-up">
+        <div className="card-header">
+          <span className="card-title">My Availability Slots</span>
           <div style={{ fontSize:'0.78rem', color:'#94A3B8' }}>Click to toggle availability</div>
         </div>
         <div className="card-body">
@@ -114,7 +170,10 @@ export default function DoctorSchedule() {
                 }}
               >
                 <Clock size={13} />
-                {s.time}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <span>{s.date}</span>
+                  <span>{s.time}</span>
+                </div>
               </button>
             ))}
           </div>
