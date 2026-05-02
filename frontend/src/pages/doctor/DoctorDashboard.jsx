@@ -1,6 +1,8 @@
+import React, { useState } from 'react';
 import { useAuth } from '../../context/Authcontext';
 import useAppointments from '../../hooks/useAppointments';
-import { CalendarDays, Users, CheckCircle2, Clock, ArrowRight, Circle } from 'lucide-react';
+import { CalendarDays, Users, CheckCircle2, Clock, ArrowRight, Circle, Plus, X } from 'lucide-react';
+import { api } from '../../services/api';
 
 const badge = s => {
   const m = { CONFIRMED:'badge-blue', PENDING:'badge-amber', COMPLETED:'badge-green', CANCELLED:'badge-slate' };
@@ -13,6 +15,36 @@ const getTodayDate = () => new Date().toISOString().split('T')[0];
 export default function DoctorDashboard() {
   const { user } = useAuth();
   const { appointments, loading } = useAppointments();
+  
+  const [showForm, setShowForm] = useState(false);
+  const [slotData, setSlotData] = useState({ date: '', startTime: '', endTime: '' });
+  const [slotStatus, setSlotStatus] = useState({ loading: false, error: null, success: false });
+
+  const handleAddSlot = async (e) => {
+    e.preventDefault();
+    setSlotStatus({ loading: true, error: null, success: false });
+    try {
+      const formattedStartTime = slotData.startTime.length === 5 ? `${slotData.startTime}:00` : slotData.startTime;
+      const formattedEndTime = slotData.endTime.length === 5 ? `${slotData.endTime}:00` : slotData.endTime;
+      
+      const payload = {
+        date: slotData.date,
+        startTime: formattedStartTime,
+        endTime: formattedEndTime
+      };
+      
+      await api.post(`/doctors/${user?.userId}/slots`, payload);
+      setSlotStatus({ loading: false, error: null, success: true });
+      setTimeout(() => {
+        setSlotStatus(s => ({ ...s, success: false }));
+        setShowForm(false);
+        setSlotData({ date: '', startTime: '', endTime: '' });
+      }, 2000);
+    } catch (err) {
+      setSlotStatus({ loading: false, error: err.message || 'Failed to add slot', success: false });
+    }
+  };
+
   const mine = appointments.filter(a => a.doctorId === user?.userId);
   const today = mine.filter(a => a.date === getTodayDate());
   const pending = mine.filter(a => a.status === 'PENDING');
@@ -31,6 +63,11 @@ export default function DoctorDashboard() {
         <div>
           <h2 style={bannerTitle}>Good morning, {user?.name} 👨‍⚕️</h2>
           <p style={bannerSub}>You have <strong>{today.length} appointments</strong> scheduled for today.</p>
+          <div style={{ marginTop: 15 }}>
+            <button className="btn" style={{ background: 'white', color: '#0D9488', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', border: 'none', borderRadius: 8, cursor: 'pointer' }} onClick={() => setShowForm(true)}>
+              <Plus size={16} /> Add Availability
+            </button>
+          </div>
         </div>
         <div style={{ textAlign:'right' }}>
           <div style={{ fontSize:'0.75rem', color:'rgba(255,255,255,0.7)', marginBottom:4 }}>Today</div>
@@ -109,6 +146,40 @@ export default function DoctorDashboard() {
         </div>
       </div>
 
+      {showForm && (
+        <div style={modalOverlay}>
+          <div style={modalContent}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <h3 style={{ margin: 0, color: '#0F172A' }}>Add Availability</h3>
+              <button onClick={() => setShowForm(false)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', padding: 0 }}><X size={20} color="#64748B"/></button>
+            </div>
+            
+            {slotStatus.error && <div style={{ padding: '10px 14px', background: '#FEF2F2', color: '#B91C1C', borderRadius: 6, fontSize: '0.86rem', marginBottom: 15 }}>{slotStatus.error}</div>}
+            {slotStatus.success && <div style={{ padding: '10px 14px', background: '#F0FDF4', color: '#15803D', borderRadius: 6, fontSize: '0.86rem', marginBottom: 15 }}>Slot added successfully!</div>}
+            
+            <form onSubmit={handleAddSlot} style={{ display: 'flex', flexDirection: 'column', gap: 15 }}>
+              <div>
+                <label style={formLabel}>Date</label>
+                <input type="date" style={inputStyle} required value={slotData.date} onChange={e => setSlotData({...slotData, date: e.target.value})} />
+              </div>
+              <div style={{ display: 'flex', gap: 15 }}>
+                <div style={{ flex: 1 }}>
+                  <label style={formLabel}>Start Time</label>
+                  <input type="time" style={inputStyle} required value={slotData.startTime} onChange={e => setSlotData({...slotData, startTime: e.target.value})} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={formLabel}>End Time</label>
+                  <input type="time" style={inputStyle} required value={slotData.endTime} onChange={e => setSlotData({...slotData, endTime: e.target.value})} />
+                </div>
+              </div>
+              <button type="submit" disabled={slotStatus.loading} style={{ ...submitBtn, opacity: slotStatus.loading ? 0.7 : 1, marginTop: 10 }}>
+                {slotStatus.loading ? 'Saving...' : 'Save Slot'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
       <div className="card fade-up" style={{ marginTop:20 }}>
         <div className="card-header">
           <span className="card-title">All Appointments</span>
@@ -152,3 +223,9 @@ const timePill  = { fontSize:'0.72rem', fontWeight:600, color:'#64748B', width:7
 const timeLine  = { position:'absolute', left:'50%', transform:'translateX(-50%)', top:10, bottom:-20, width:1, background:'#E2E8F0' };
 const schedCard = { flex:1, background:'#F8FAFC', border:'1px solid #E2E8F0', borderRadius:10, padding:'10px 14px', display:'flex', flexDirection:'column', gap:5 };
 const pendItem  = { display:'flex', alignItems:'center', gap:12, padding:'12px 20px', borderBottom:'1px solid #F1F5F9' };
+
+const modalOverlay = { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 };
+const modalContent = { background: 'white', borderRadius: 16, padding: 28, width: '100%', maxWidth: 420, boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)' };
+const formLabel = { display: 'block', fontSize: '0.86rem', fontWeight: 500, color: '#475569', marginBottom: 6 };
+const inputStyle = { width: '100%', padding: '10px 14px', borderRadius: 8, border: '1px solid #CBD5E1', fontSize: '0.95rem', outline: 'none', transition: 'border-color 0.2s' };
+const submitBtn = { width: '100%', padding: '12px', background: '#0D9488', color: 'white', border: 'none', borderRadius: 8, fontWeight: 600, fontSize: '0.95rem', cursor: 'pointer', transition: 'background 0.2s' };
